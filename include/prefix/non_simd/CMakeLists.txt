@@ -1,0 +1,1 @@
+target_include_directories(prefix_non_simd PUBLIC ${PROJECT_SOURCE_DIR}/include)
