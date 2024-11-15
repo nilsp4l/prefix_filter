@@ -16,7 +16,7 @@ namespace prefix::non_simd
     bin()
     {
       static_assert(((Q - 1) & 0x4) == 0, "Q - 1 must be a multiple of 8");
-      pd = new uint8_t[512];
+      pd = new uint8_t[64];
     }
 
     ~bin() override
