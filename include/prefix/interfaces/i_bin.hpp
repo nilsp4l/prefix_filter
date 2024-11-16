@@ -14,9 +14,9 @@ namespace prefix::interfaces
   public:
     virtual ~i_bin() = default;
 
-    constexpr virtual bool query(uint8_t key) const = 0;
+    [[nodiscard]] constexpr virtual bool query(const uint8_t q, const uint8_t r) const = 0;
 
-    constexpr virtual void insert(uint8_t key) = 0;
+    constexpr virtual void insert(const uint8_t q, const uint8_t r) = 0;
   };
 }// namespace prefix::interfaces
 
