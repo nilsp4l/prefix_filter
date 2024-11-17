@@ -7,6 +7,7 @@
 
 #include <bit>
 #include <array>
+#include <iostream>
 #include "prefix/interfaces/i_bin.hpp"
 #include "prefix/util/masks.hpp"
 
@@ -32,7 +33,7 @@ namespace prefix::non_simd
          delete[] pd;
       }
 
-      uint8_t &operator[](uint8_t index) const
+      uint8_t &operator[](uint8_t index) const override
       {
          return pd[8 + index];
       }
@@ -43,6 +44,7 @@ namespace prefix::non_simd
          uint8_t list_size{get_list_size(index[0] + index[1])};
          for (uint8_t i{index[1]}; i < index[1] + list_size; ++i)
          {
+            std::cout << std::to_string(this->operator[](i)) << std::endl;
             if (this->operator[](i) == r)
             {
                return true;
@@ -65,8 +67,9 @@ namespace prefix::non_simd
             return;
          }
          auto list_index{get_list_index(q)};
-         insert_into_body(list_index[1] + get_list_size(list_index[0] + list_index[1]), r);
-         insert_into_header(list_index[0] + list_index[1]);
+         auto list_size{get_list_size(list_index[0] + list_index[1])};
+         insert_into_body(list_index[1] + list_size, r);
+         insert_into_header(list_index[0] + list_index[1] + list_size);
       }
 
       constexpr uint8_t size()
@@ -85,11 +88,13 @@ namespace prefix::non_simd
             this->operator[](i + 1) = this->operator[](i);
          }
          this->operator[](index) = r;
+
       }
 
       constexpr void insert_into_header(uint8_t index)
       {
          auto *header{reinterpret_cast<uint64_t *>(pd)};
+         auto foo = util::bit_mask_left_rt<uint64_t>::value(index);
          uint64_t up_to_insertion{(util::bit_mask_left_rt<uint64_t>::value(index) & *header)};
          *header <<= index;
          *header >>= index + 1;
@@ -117,17 +122,17 @@ namespace prefix::non_simd
 
          uint8_t remaining{k};
          uint8_t zero_count{0};
-         constexpr uint8_t first_bit_mask{util::bit_mask_position<uint8_t, 0>::value}; // <| 0b1000 0000
+         constexpr uint64_t first_bit_mask{util::bit_mask_position<uint64_t, 0>::value}; // <| 0b1000 0000
          while (remaining > 0)
          {
-            if ((header & first_bit_mask))
+            // we are in the required list
+            if (zero_count == q)
+            {
+               return {static_cast<uint8_t>(zero_count), static_cast<uint8_t>(k - remaining)};
+            }
+            else if ((header & first_bit_mask))
             {
                --remaining;
-            }
-            // we are in the required list
-            else if (zero_count == q)
-            {
-               return {zero_count, static_cast<uint8_t>(k - remaining)};
             }
             else
             {

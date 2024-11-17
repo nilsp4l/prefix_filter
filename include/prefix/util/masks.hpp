@@ -42,7 +42,7 @@ namespace prefix::util
         requires std::is_integral_v<numberT>
     struct bit_mask_left_rt
     {
-        static constexpr uint8_t value(uint8_t position)
+        static constexpr numberT value(uint8_t position)
         {
             return static_cast<numberT>(~((static_cast<numberT>(1) << ((sizeof(numberT) << 3) - (position + 1))) - 1));
         }
