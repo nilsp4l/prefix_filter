@@ -11,11 +11,6 @@ int main()
   {
 
      bin->insert(i, i);
-     for(uint8_t j{0}; j < 25; ++j)
-     {
-        uint8_t val{(*bin)[j]};
-        std::cout << std::to_string(val) << std::endl;
-     }
   }
   for(int i{0}; i < 25; ++i)
   {
