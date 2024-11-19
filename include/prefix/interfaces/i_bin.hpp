@@ -9,17 +9,18 @@
 
 namespace prefix::interfaces
 {
-class i_bin {
- public:
-  virtual ~i_bin () = default;
+class i_bin
+{
+public:
+  virtual ~i_bin() = default;
 
-  virtual uint8_t &operator[] (uint8_t index) const = 0;
+  virtual uint8_t& operator[](uint8_t index) const = 0;
 
-  [[nodiscard]] constexpr virtual bool query (uint8_t q, uint8_t r) const = 0;
+  [[nodiscard]] constexpr virtual bool query(uint8_t q, uint8_t r) const = 0;
 
-  constexpr virtual void insert (uint8_t q, uint8_t r) = 0;
+  constexpr virtual void insert(uint8_t q, uint8_t r) = 0;
 
-  virtual constexpr uint8_t size () = 0;
+  virtual constexpr uint8_t size() = 0;
 };
 }// namespace prefix::interfaces
 
