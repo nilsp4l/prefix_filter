@@ -21,15 +21,16 @@ TEST_F(pocket_dictionary_test, insert_linear)
 {
 
   std::vector<uint8_t> compare_vector;
-  for (uint8_t i{0}; i < 25; ++i)
+  for (uint8_t i{1}; i < 26; ++i)
   {
-    pd_->insert(i, i);
-    ASSERT_EQ(pd_->size(), i + 1);
+    pd_->insert(i - 1, i);
+    ASSERT_EQ(pd_->size(), i);
     compare_vector.push_back(i);
   }
-  for (uint8_t i{0}; i < 25; ++i)
+
+  for (uint8_t i{1}; i < 26; ++i)
   {
-    ASSERT_TRUE(pd_->query(i, i));
+    ASSERT_TRUE(pd_->query(i - 1, i));
     ASSERT_EQ((*pd_)[i], compare_vector[i]);
   }
 }
