@@ -20,7 +20,7 @@ public:
   {
     static_assert(k <= 25 && k > 0);
     // initialized with 0, which is important for the header to be initialized with no elements in it
-    data_ = new uint8_t[64]();
+    data_ = new uint8_t[32]();
   }
 
   ~pocket_dictionary() override
@@ -175,7 +175,6 @@ private:
 
   constexpr void mark_overflowed()
   {
-    this->operator[](k) |= util::bit_mask_position<uint8_t, 0>::value;
   }
 
   constexpr bool overflowed()
@@ -203,9 +202,9 @@ private:
       }
     }
 
-    for (uint8_t i{index}; i < size() - 1; ++i)
+    for (uint8_t i{size() + 1}; i > index + list_size; --i)
     {
-      this->operator[](i + 1) = this->operator[](i);
+      this->operator[](i) = this->operator[](i - 1);
     }
     this->operator[](index + list_size) = r;
     return true;
@@ -223,11 +222,6 @@ private:
     header |= util::bit_mask_position_rt<uint64_t>::value(index);
 
 
-    auto* header_ptr{get_header_ptr()};
-    uint64_t header_cpy{*header_ptr};
-    //header_cpy &= ~util::bit_mask_left<uint64_t, 2 * k>::value;
-    //header |= header_cpy;
-    // header will have a maximum length of 2 * k at this point, if called correctly, which we assume here
     set_header(header);
   }
 
