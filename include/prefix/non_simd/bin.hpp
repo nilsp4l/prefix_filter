@@ -8,6 +8,7 @@
 #include <bit>
 #include <array>
 #include <iostream>
+#include <functional>
 #include "prefix/interfaces/i_bin.hpp"
 #include "prefix/util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
@@ -15,14 +16,13 @@
 namespace prefix::non_simd
 {
 
-/// this is the naive implementation used mainly for comparison and base of the optimized ones, as
-/// it is much easier to understand.
-/// !Not optimized at all!
+
 template<uint8_t k>
 class bin : public interfaces::i_bin
 {
 public:
-  bin()
+  explicit bin(std::function<uint8_t(uint8_t)> mini_hash)
+    : mini_hash_(std::move(mini_hash))
   {
     static_assert(k <= 25);
   }
@@ -36,12 +36,12 @@ public:
 
   [[nodiscard]] constexpr bool query(uint8_t fp) const override
   {
-    return true;
+    return pd_.query(mini_hash_(fp), fp);
   }
 
   constexpr void insert(uint8_t fp) override
   {
-
+    pd_.insert(mini_hash_(fp), fp);
   }
 
   [[nodiscard]] constexpr uint8_t size() const override
@@ -52,6 +52,7 @@ public:
 
 private:
   pocket_dictionary<k> pd_{};
+  std::function<uint8_t(uint8_t)> mini_hash_;
 
 };
 } // namespace prefix::non_simd

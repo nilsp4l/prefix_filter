@@ -12,6 +12,9 @@
 
 namespace prefix::non_simd
 {
+/// this is the naive implementation used mainly for comparison and base of the optimized ones, as
+/// it is much easier to understand.
+/// !Not optimized at all!
 template<uint8_t k>
 class pocket_dictionary : public interfaces::i_pocket_dictionary
 {
@@ -202,7 +205,7 @@ private:
       }
     }
 
-    for (uint8_t i{size() + 1}; i > index + list_size; --i)
+    for (uint8_t i{static_cast<uint8_t>(size() + 1)}; i > index + list_size; --i)
     {
       this->operator[](i) = this->operator[](i - 1);
     }
