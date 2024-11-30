@@ -50,12 +50,12 @@ public:
     return false;
   }
 
-  constexpr bool insert(const uint8_t q, const uint8_t r) override
+  constexpr std::optional<uint8_t> insert(const uint8_t q, const uint8_t r) override
   {
 
     if (q >= k)
     {
-      return false;
+      return std::nullopt;
     }
 
     // already k elements in data_
@@ -72,7 +72,7 @@ public:
       insert_into_header(list_index[0] + list_index[1] + list_size);
     }
 
-    return true;
+    return std::nullopt;
 
   }
 
@@ -119,54 +119,6 @@ private:
     return pos;
   }
 
-  constexpr void move_max_to_last()
-  {
-    uint64_t header{get_header()};
-    uint8_t current_max{0};
-    uint8_t max_index{0};
-    uint8_t header_index{0};
-    for (uint8_t i{0}; i < size() && header; ++i)
-    {
-      while (!(header & util::bit_mask_position<uint64_t, 0>::value))
-      {
-        header <<= 1;
-        ++header_index;
-      }
-
-      if (this->operator[](i) > current_max)
-      {
-        current_max = this->operator[](i);
-        max_index = i;
-      }
-      header <<= 1;
-      ++header_index;
-    }
-
-    auto header_cpy{get_header()};
-    uint64_t up_to_insert{header_cpy & util::bit_mask_left_rt<uint8_t>::value(header_index)};
-    header_cpy <<= header_index + 1;
-    header_cpy >>= header_index;
-    header_cpy |= up_to_insert;
-
-    auto* header_ptr{get_header_ptr()};
-    *header_ptr |= header_cpy;
-
-    // max_index is guaranteed to be greater than 0
-    for (uint8_t i{static_cast<uint8_t>(max_index - 1)}; i < size(); ++i)
-    {
-      this->operator[](i) = this->operator[](i - 1);
-    }
-
-    insert(find_biggest_q(), current_max);
-
-  }
-
-  constexpr void set_new_max(uint8_t new_max)
-  {
-    // max needs to be at the last position in the body if this method is called
-    this->operator[](k - 1) = new_max;
-  }
-
   constexpr std::optional<uint8_t> max()
   {
     if (overflowed())
@@ -185,14 +137,53 @@ private:
     return (this->operator[](k) & util::bit_mask_position<uint8_t, 0>::value);
   }
 
-  constexpr bool overflowed_procedure(uint8_t r)
+  constexpr void set_max(uint8_t new_max)
   {
-    if (!overflowed())
+    this->operator[](k - 1) = new_max;
+  }
+
+  constexpr std::optional<uint8_t> overflowed_procedure(uint8_t r)
+  {
+
+    if (overflowed() && max() == r)
     {
-      move_max_to_last();
+      return std::nullopt;
     }
 
-    return true;
+    if (overflowed() && max() > r)
+    {
+      auto tmp_max{max()};
+      set_max(r);
+      return tmp_max;
+    }
+
+    if (overflowed() && max() < r)
+    {
+      return r;
+    }
+
+    assert(!overflowed());
+
+
+    auto current_max{0};
+
+    if (current_max == r)
+    {
+      return std::nullopt;
+    }
+
+    if (current_max > r)
+    {
+      set_max(r);
+      return current_max;
+    }
+
+    if (current_max < r)
+    {
+      return r;
+    }
+
+    __builtin_unreachable();
   }
 
   constexpr bool insert_into_body(uint8_t index, uint8_t r, uint8_t list_size)

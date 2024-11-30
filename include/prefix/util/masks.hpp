@@ -2,8 +2,8 @@
 // Created by nils on 11/16/24.
 //
 
-#ifndef PREFIX_UTIL_MASKS_H
-#define PREFIX_UTIL_MASKS_H
+#ifndef PREFIX_UTIL_MASKS_HPP
+#define PREFIX_UTIL_MASKS_HPP
 
 #include <bit>
 #include <cstdint>
@@ -52,4 +52,4 @@ struct bit_mask_left_rt
 
 } // namespace prefix::util
 
-#endif // PREFIX_UTIL_MASKS_H
+#endif // PREFIX_UTIL_MASKS_HPP

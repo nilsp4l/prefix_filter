@@ -12,32 +12,12 @@ class bin_test : public testing::Test
 public:
   bin_test()
   {
-
-    this->bin_ = std::make_unique<prefix::non_simd::bin<25>>([](uint8_t fp)
-    {
-      return fp % 25;
-    });
+    this->bin_ = std::make_unique<prefix::non_simd::bin<25>>();
   }
 
   std::unique_ptr<prefix::interfaces::i_bin> bin_;
 };
 
-TEST_F(bin_test, insert_linear)
-{
-  std::vector<uint8_t> compare_vector;
-  for (uint8_t i{0}; i < 25; ++i)
-  {
-    bin_->insert(i);
-    ASSERT_EQ(bin_->size(), i + 1);
-    compare_vector.push_back(i);
-  }
-
-  for (uint8_t i{0}; i < 25; ++i)
-  {
-    ASSERT_TRUE(bin_->query(i));
-    ASSERT_EQ((*bin_)[i], compare_vector[i]);
-  }
-}
 
 TEST_F(bin_test, random_insert_lookup_size_10)
 {

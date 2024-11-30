@@ -12,6 +12,7 @@
 #include "prefix/interfaces/i_bin.hpp"
 #include "prefix/util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
+#include "prefix/util/hash_functions.hpp"
 
 namespace prefix::non_simd
 {
@@ -21,8 +22,7 @@ template<uint8_t k>
 class bin : public interfaces::i_bin
 {
 public:
-  explicit bin(std::function<uint8_t(uint8_t)> mini_hash)
-    : mini_hash_(std::move(mini_hash))
+  explicit bin()
   {
     static_assert(k <= 25);
   }
@@ -36,12 +36,12 @@ public:
 
   [[nodiscard]] constexpr bool query(uint8_t fp) const override
   {
-    return pd_.query(mini_hash_(fp), fp);
+    return pd_.query(util::most_significant_based_fp<k>::fingerprint(fp), fp);
   }
 
   constexpr void insert(uint8_t fp) override
   {
-    pd_.insert(mini_hash_(fp), fp);
+    pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
   }
 
   [[nodiscard]] constexpr uint8_t size() const override
@@ -52,7 +52,6 @@ public:
 
 private:
   pocket_dictionary<k> pd_{};
-  std::function<uint8_t(uint8_t)> mini_hash_;
 
 };
 } // namespace prefix::non_simd

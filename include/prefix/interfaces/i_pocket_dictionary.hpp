@@ -18,7 +18,9 @@ public:
 
   [[nodiscard]] constexpr virtual bool query(uint8_t q, uint8_t r) const = 0;
 
-  constexpr virtual bool insert(uint8_t q, uint8_t r) = 0;
+  /// @returns std::nullopt when inserted/already there.
+  /// @returns value of the element which was evicted (to be sent to spare)
+  constexpr virtual std::optional<uint8_t> insert(uint8_t q, uint8_t r) = 0;
 
   [[nodiscard]] virtual constexpr uint8_t size() const = 0;
 };
