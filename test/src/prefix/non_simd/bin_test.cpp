@@ -88,6 +88,49 @@ TEST_F(bin_test, random_insert_lookup_size_25)
       ASSERT_FALSE(bin_->query(fp));
     }
   }
+}
+
+TEST_F(bin_test, linear_insert_max_set_once)
+{
+  for (uint8_t i{1}; i < 26; ++i)
+  {
+    bin_->insert(i);
+  }
+  bin_->insert(0);
+
+  for (uint8_t i{1}; i < 25; ++i)
+  {
+    ASSERT_TRUE(bin_->query(i));
+  }
+
+
+  ASSERT_FALSE(bin_->query(25));
+  ASSERT_TRUE(bin_->query(24));
+}
+
+TEST_F(bin_test, insert_10_max_switches)
+{
+  for (uint8_t i{1}; i < 26; ++i)
+  {
+    bin_->insert(i * 10);
+  }
+
+
+  uint8_t current_max{250};
+  ASSERT_EQ((*bin_)[24], current_max);
+
+  for (uint8_t i{0}; i < 10; ++i)
+  {
+    bin_->insert(i);
+
+    current_max -= 10;
+    ASSERT_EQ((*bin_)[24], current_max);
+  }
+
+  for (uint8_t i{0}; i < 10; ++i)
+  {
+    ASSERT_TRUE(bin_->query(i));
+  }
 
 }
 

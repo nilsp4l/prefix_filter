@@ -41,7 +41,29 @@ public:
 
   constexpr void insert(uint8_t fp) override
   {
+    if (pd_.size() == k && !pd_.overflowed())
+    {
+      pd_.mark_overflowed();
+      pd_.max_move_procedure();
+    }
+
+
+    if (!pd_.overflowed())
+    {
+      pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
+      return;
+    }
+
+    if (fp > pd_.max())
+    {
+      // TODO: tell holding prefix filter to move to spare
+      return;
+    }
+
+    pd_.evict_max();
     pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
+    pd_.max_move_procedure();
+
   }
 
   [[nodiscard]] constexpr uint8_t size() const override

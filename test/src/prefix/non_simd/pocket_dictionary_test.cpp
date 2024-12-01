@@ -37,6 +37,24 @@ TEST_F(pocket_dictionary_test, insert_linear)
   }
 }
 
+TEST_F(pocket_dictionary_test, insert_all_in_1_list)
+{
+
+  std::vector<uint8_t> compare_vector;
+  for (uint8_t i{1}; i < 26; ++i)
+  {
+    pd_->insert(0, i);
+    ASSERT_EQ(pd_->size(), i);
+    compare_vector.push_back(i);
+  }
+
+  for (uint8_t i{1}; i < 26; ++i)
+  {
+    ASSERT_TRUE(pd_->query(0, i));
+    ASSERT_EQ((*pd_)[i - 1], compare_vector[i - 1]);
+  }
+}
+
 TEST_F(pocket_dictionary_test, double_insert)
 {
 
