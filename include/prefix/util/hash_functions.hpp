@@ -34,12 +34,37 @@ struct most_significant_based_fp<25>
 
     assert(r < 32);
 
-    if (r <= 7)
+    switch (r)
     {
-      return r;
+    case 0 :
+      [[fallthrough]];
+    case 1:
+      return 0;
+    case 2:
+      [[fallthrough]];
+    case 3:
+      return 1;
+    case 4:
+      [[fallthrough]];
+    case 5:
+      return 2;
+    case 6:
+      [[fallthrough]];
+    case 7:
+      return 3;
+    case 8:
+      [[fallthrough]];
+    case 9:
+      return 4;
+    case 10:
+      [[fallthrough]];
+    case 11:
+      return 5;
+    case 12:
+      return 6;
+    default:
+      return r - 7;
     }
-
-    return r - 7;
   }
 };
 }
