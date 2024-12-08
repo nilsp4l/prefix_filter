@@ -10,9 +10,9 @@
 #include <iostream>
 #include <functional>
 #include "prefix/interfaces/i_bin.hpp"
-#include "prefix/util/masks.hpp"
+#include "util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
-#include "prefix/util/hash_functions.hpp"
+#include "util/hash_functions.hpp"
 
 namespace prefix::non_simd
 {

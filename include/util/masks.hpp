@@ -2,13 +2,13 @@
 // Created by nils on 11/16/24.
 //
 
-#ifndef PREFIX_UTIL_MASKS_HPP
-#define PREFIX_UTIL_MASKS_HPP
+#ifndef UTIL_MASKS_HPP
+#define UTIL_MASKS_HPP
 
 #include <bit>
 #include <cstdint>
 
-namespace prefix::util
+namespace util
 {
 // creates a bitmask with one singular bit set at position counting from left starting at 0
 // for example: bit_mask<uint8_t, 2>::value == 0b0010 0000
@@ -52,4 +52,4 @@ struct bit_mask_left_rt
 
 } // namespace prefix::util
 
-#endif // PREFIX_UTIL_MASKS_HPP
+#endif // UTIL_MASKS_HPP

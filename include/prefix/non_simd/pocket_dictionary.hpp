@@ -6,7 +6,7 @@
 #define INCLUDE_PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
 
 #include "prefix/interfaces/i_pocket_dictionary.hpp"
-#include "prefix/util/masks.hpp"
+#include "util/masks.hpp"
 
 #include <cstdint>
 
@@ -237,7 +237,6 @@ private:
     header >>= index + 1;
     header |= up_to_insertion;
     header |= util::bit_mask_position_rt<uint64_t>::value(index);
-
 
     set_header(header);
   }

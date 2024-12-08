@@ -2,15 +2,15 @@
 // Created by nils on 11/30/24.
 //
 
-#ifndef PREFIX_UTIL_HASH_FUNCTIONS_HPP
-#define PREFIX_UTIL_HASH_FUNCTIONS_HPP
+#ifndef UTIL_HASH_FUNCTIONS_HPP
+#define UTIL_HASH_FUNCTIONS_HPP
 
 #include <functional>
 #include <cstdint>
 
-#include "prefix/util/masks.hpp"
+#include "masks.hpp"
 
-namespace prefix::util
+namespace util
 {
 
 // we are interested in having the biggest element stored in the last non-empty list,
@@ -70,4 +70,4 @@ struct most_significant_based_fp<25>
 }
 
 
-#endif //PREFIX_UTIL_HASH_FUNCTIONS_HPP
+#endif // UTIL_HASH_FUNCTIONS_HPP
