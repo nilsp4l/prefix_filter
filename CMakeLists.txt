@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(prefix_filter_dse)
 
-add_compile_options(-Wall -Wextra -Wconversion -pedantic -Wfatal-errors -g -fsanitize=leak)
+add_compile_options(-Wall -Wextra -Wconversion -pedantic -Wfatal-errors -g --assert -fsanitize=leak -march=native)
 
 
 add_subdirectory(src)

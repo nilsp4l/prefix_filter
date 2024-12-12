@@ -9,6 +9,7 @@
 #include "util/masks.hpp"
 
 #include <cstdint>
+#include <assert.h>
 
 namespace prefix::non_simd
 {
