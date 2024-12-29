@@ -52,24 +52,26 @@ namespace util
     }
   };
 
-  template <uint8_t position>
-  struct _m256i_bit_mask_left
+  // creates a bitmask with all bits set up to position counting from right starting at 0
+  // for example: bit_mask<uint8_t, 2>::value == 0b0000 0011
+  template <typename numberT, uint8_t position>
+    requires std::is_integral_v<numberT>
+  struct bit_mask_right
   {
-    static const __m256i value()
+    static constexpr numberT
+        value{static_cast<numberT>((static_cast<numberT>(1) << position) - 1)};
+  };
+
+  template <typename numberT>
+    requires std::is_integral_v<numberT>
+  struct bit_mask_right_rt
+  {
+    static constexpr numberT value(uint8_t position)
     {
-      return _mm256_srli_si256(_mm256_set1_epi64x(-1), position);
+      return static_cast<numberT>(static_cast<numberT>((static_cast<numberT>(1) << position) - 1));
     }
   };
 
-
-  struct _mm256i_bit_mask_no_header
-  {
-    static const __m256i value()
-    {
-      return _mm256_set_epi8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-                      -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0);
-    }
-  };
 
 } // namespace util
 
