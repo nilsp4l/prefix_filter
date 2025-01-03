@@ -6,6 +6,7 @@
 #define INCLUDE_PREFIX_INTERFACES_I_BIN_HPP
 
 #include <cstdint>
+#include <optional>
 
 namespace prefix::interfaces
 {
@@ -18,7 +19,7 @@ public:
 
   [[nodiscard]] constexpr virtual bool query(uint8_t fp) const = 0;
 
-  constexpr virtual void insert(uint8_t fp) = 0;
+  constexpr virtual std::optional<uint8_t> insert(uint8_t fp) = 0;
 
   virtual constexpr uint8_t size() const = 0;
 };

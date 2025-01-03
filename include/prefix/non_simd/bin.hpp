@@ -39,7 +39,7 @@ public:
     return pd_.query(util::most_significant_based_fp<k>::fingerprint(fp), fp);
   }
 
-  constexpr void insert(uint8_t fp) override
+  constexpr std::optional<uint8_t> insert(uint8_t fp) override
   {
     if (pd_.size() == k && !pd_.overflowed())
     {
@@ -51,19 +51,21 @@ public:
     if (!pd_.overflowed())
     {
       pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
-      return;
+      return std::nullopt;
     }
 
-    if (fp > pd_.max())
+    uint8_t max{pd_.max()};
+
+    if (fp > max)
     {
-      // TODO: tell holding prefix filter to move to spare
-      return;
+      return fp;
     }
 
     pd_.evict_max();
     pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
     pd_.max_move_procedure();
-
+    
+    return max;
   }
 
   [[nodiscard]] constexpr uint8_t size() const override

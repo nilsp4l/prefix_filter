@@ -14,7 +14,7 @@ class pocket_dictionary_test : public testing::Test
 public:
   pocket_dictionary_test()
   {
-    this->pd_ = std::make_unique<prefix::simd::pocket_dictionary<25>>();
+    this->pd_ = std::make_unique<prefix::non_simd::pocket_dictionary<25>>();
   }
 
   std::unique_ptr<prefix::interfaces::i_pocket_dictionary> pd_;
