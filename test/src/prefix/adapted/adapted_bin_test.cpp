@@ -16,6 +16,19 @@ public:
     this->bin_ = std::make_unique<prefix::adapted::bin>();
   }
 
+  [[nodiscard]] uint8_t find_maximum_linear() const
+  {
+    uint8_t current_max{0};
+    for (uint8_t i{0}; i < 31; ++i)
+    {
+      if (bin_->operator[](i) > current_max)
+      {
+        current_max = bin_->operator[](i);
+      }
+    }
+    return current_max;
+  }
+
   std::unique_ptr<prefix::interfaces::i_bin> bin_;
 };
 
@@ -106,5 +119,43 @@ TEST_F(adapted_bin_test, linear_insert_max_set_once)
 
   ASSERT_FALSE(bin_->query(31));
   ASSERT_TRUE(bin_->query(30));
+}
+
+TEST_F(adapted_bin_test, insert_max_set_multiple_times)
+{
+  for (uint8_t i{UINT8_MAX - 30}; i < UINT8_MAX; ++i)
+  {
+
+    ASSERT_FALSE(bin_->insert(i));
+
+  }
+  ASSERT_FALSE(bin_->insert(UINT8_MAX));
+
+  for (uint8_t i{UINT8_MAX - 30}; i < UINT8_MAX; ++i)
+  {
+    ASSERT_TRUE(bin_->query(i));
+  }
+
+  ASSERT_TRUE(bin_->query(UINT8_MAX));
+
+  for (uint8_t i{0}; i < UINT8_MAX - 30; ++i)
+  {
+    std::optional<uint8_t> return_val{};
+    uint8_t max{find_maximum_linear()};
+
+    ASSERT_TRUE((return_val = bin_->insert(i)));
+    ASSERT_GE(*return_val, max);
+    ASSERT_EQ(bin_->size(), 31);
+    if (i <= max)
+    {
+      ASSERT_TRUE(bin_->query(i));
+    }
+    else
+    {
+      ASSERT_FALSE(bin_->query(i));
+    }
+
+    ASSERT_FALSE(bin_->query(*return_val));
+  }
 }
 

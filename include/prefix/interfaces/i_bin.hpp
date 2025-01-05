@@ -21,7 +21,7 @@ public:
 
   constexpr virtual std::optional<uint8_t> insert(uint8_t fp) = 0;
 
-  virtual constexpr uint8_t size() const = 0;
+  [[nodiscard]] constexpr virtual uint8_t size() const = 0;
 };
 }// namespace prefix::interfaces
 

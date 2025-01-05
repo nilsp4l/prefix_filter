@@ -9,7 +9,7 @@
 #include "util/masks.hpp"
 
 #include <cstdint>
-#include <assert.h>
+#include <cassert>
 
 namespace prefix::non_simd
 {
@@ -66,7 +66,7 @@ public:
     // element is inserted because it wasn't already there
     if (insert_into_body(list_index[1], r, list_size))
     {
-      insert_into_header(list_index[0] + list_index[1] + list_size);
+      insert_into_header(static_cast<uint8_t>(list_index[0] + list_index[1] + list_size));
     }
 
   }
@@ -108,7 +108,8 @@ public:
     const uint8_t biggest_q{get_biggest_q()};
     const auto list_indices{get_list_index(biggest_q)};
     auto header{get_header()};
-    uint64_t up_to_deletion{header & util::bit_mask_left_rt<uint64_t>::value(list_indices[0] + list_indices[1] - 1)};
+    uint64_t up_to_deletion
+      {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(list_indices[0] + list_indices[1] - 1))};
     header <<= list_indices[0] + list_indices[1] + 1;
     header >>= list_indices[0] + list_indices[1];
     header |= up_to_deletion;

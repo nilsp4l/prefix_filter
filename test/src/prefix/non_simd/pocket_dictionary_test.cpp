@@ -147,7 +147,7 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_linear)
       ASSERT_TRUE(pd_->query(list_index, compare_array[list_index][j]));
       ASSERT_EQ((*pd_)[pd_index + j], compare_array[list_index][j]);
     }
-    pd_index += compare_array[list_index].size();
+    pd_index += static_cast<uint8_t>(compare_array[list_index].size());
   }
 }
 
@@ -236,7 +236,7 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
       ASSERT_TRUE(pd_->query(list_index, compare_array[list_index][j]));
       ASSERT_EQ((*pd_)[pd_index + j], compare_array[list_index][j]);
     }
-    pd_index += compare_array[list_index].size();
+    pd_index += static_cast<uint8_t>(compare_array[list_index].size());
   }
 
 }
