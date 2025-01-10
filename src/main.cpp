@@ -7,7 +7,6 @@ int main()
 
   auto pd{prefix::simd::pocket_dictionary<25>()};
   
-  auto moo{util::reg_128_bit_mask_left<5>::value()};
   
   pd.insert(2, 3);
   pd.insert(1, 2);

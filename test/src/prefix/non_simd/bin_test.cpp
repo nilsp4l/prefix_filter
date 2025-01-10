@@ -6,6 +6,7 @@
 #include <random>
 #include <set>
 #include "prefix/non_simd/bin.hpp"
+#include <iostream>
 
 class bin_test : public testing::Test
 {
@@ -96,6 +97,7 @@ TEST_F(bin_test, linear_insert_max_set_once)
   {
     bin_->insert(i);
   }
+
   bin_->insert(0);
 
   for (uint8_t i{1}; i < 25; ++i)
@@ -107,6 +109,7 @@ TEST_F(bin_test, linear_insert_max_set_once)
   ASSERT_FALSE(bin_->query(25));
   ASSERT_TRUE(bin_->query(24));
 }
+
 
 TEST_F(bin_test, insert_10_max_switches)
 {

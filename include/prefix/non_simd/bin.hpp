@@ -12,6 +12,7 @@
 #include "prefix/interfaces/i_bin.hpp"
 #include "util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
+#include "prefix/simd/pocket_dictionary.hpp"
 #include "util/hash_functions.hpp"
 
 namespace prefix::non_simd
@@ -61,6 +62,8 @@ public:
       return fp;
     }
 
+    
+
     pd_.evict_max();
     pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
     pd_.max_move_procedure();
@@ -75,7 +78,7 @@ public:
 
 
 private:
-  pocket_dictionary<k> pd_{};
+  simd::pocket_dictionary<k> pd_{};
 
 };
 } // namespace prefix::non_simd
