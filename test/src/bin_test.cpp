@@ -5,23 +5,31 @@
 #include <gtest/gtest.h>
 #include <random>
 #include <set>
-#include "prefix/non_simd/bin.hpp"
+#include "prefix/bin.hpp"
+
 #include <iostream>
 
-class bin_test : public testing::Test
+class bin_test : public testing::TestWithParam<std::shared_ptr<prefix::interfaces::i_bin>>
 {
 public:
   bin_test()
   {
-    this->bin_ = std::make_unique<prefix::non_simd::bin<25>>();
   }
 
-  std::unique_ptr<prefix::interfaces::i_bin> bin_;
 };
 
 
-TEST_F(bin_test, random_insert_lookup_size_10)
+INSTANTIATE_TEST_CASE_P(all_bin_tests, bin_test, testing::Values(
+  std::make_shared<prefix::bin<25, prefix::non_simd::pocket_dictionary<25>>>(),
+  std::make_shared<prefix::bin<25, prefix::simd::pocket_dictionary<25>>>()
+));
+
+
+TEST_P(bin_test, random_insert_lookup_size_10)
 {
+
+  auto bin{GetParam()};
+
   std::random_device random_device;
 
   std::mt19937 mers{random_device()};
@@ -38,26 +46,29 @@ TEST_F(bin_test, random_insert_lookup_size_10)
   for (auto rand_val : rand_values)
   {
     rand_set.insert(rand_val);
-    bin_->insert(rand_val);
-    ASSERT_EQ(rand_set.size(), bin_->size());
+    bin->insert(rand_val);
+    ASSERT_EQ(rand_set.size(), bin->size());
   }
 
   for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)
   {
     if (rand_set.contains(fp))
     {
-      ASSERT_TRUE(bin_->query(fp));
+      ASSERT_TRUE(bin->query(fp));
     }
     else
     {
-      ASSERT_FALSE(bin_->query(fp));
+      ASSERT_FALSE(bin->query(fp));
     }
   }
 
 }
 
-TEST_F(bin_test, random_insert_lookup_size_25)
+TEST_P(bin_test, random_insert_lookup_size_25)
 {
+
+  auto bin{GetParam()};
+
   std::random_device random_device;
 
   std::mt19937 mers{random_device()};
@@ -74,65 +85,71 @@ TEST_F(bin_test, random_insert_lookup_size_25)
   for (auto rand_val : rand_values)
   {
     rand_set.insert(rand_val);
-    bin_->insert(rand_val);
-    ASSERT_EQ(rand_set.size(), bin_->size());
+    bin->insert(rand_val);
+    ASSERT_EQ(rand_set.size(), bin->size());
   }
 
   for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)
   {
     if (rand_set.contains(fp))
     {
-      ASSERT_TRUE(bin_->query(fp));
+      ASSERT_TRUE(bin->query(fp));
     }
     else
     {
-      ASSERT_FALSE(bin_->query(fp));
+      ASSERT_FALSE(bin->query(fp));
     }
   }
 }
 
-TEST_F(bin_test, linear_insert_max_set_once)
+TEST_P(bin_test, linear_insert_max_set_once)
 {
+
+  auto bin{GetParam()};
+
   for (uint8_t i{1}; i < 26; ++i)
   {
-    bin_->insert(i);
+    bin->insert(i);
   }
 
-  bin_->insert(0);
+  bin->insert(0);
 
   for (uint8_t i{1}; i < 25; ++i)
   {
-    ASSERT_TRUE(bin_->query(i));
+    ASSERT_TRUE(bin->query(i));
   }
 
 
-  ASSERT_FALSE(bin_->query(25));
-  ASSERT_TRUE(bin_->query(24));
+  ASSERT_FALSE(bin->query(25));
+  ASSERT_TRUE(bin->query(24));
 }
 
 
-TEST_F(bin_test, insert_10_max_switches)
+TEST_P(bin_test, insert_10_max_switches)
 {
+
+  auto bin{GetParam()};
+
   for (uint8_t i{1}; i < 26; ++i)
   {
-    bin_->insert(i * 10);
+    bin->insert(i * 10);
   }
 
 
   uint8_t current_max{250};
-  ASSERT_EQ((*bin_)[24], current_max);
+  ASSERT_EQ((*bin)[24], current_max);
 
   for (uint8_t i{0}; i < 10; ++i)
   {
-    bin_->insert(i);
+    bin->insert(i);
 
     current_max -= 10;
-    ASSERT_EQ((*bin_)[24], current_max);
+    ASSERT_EQ((*bin)[24], current_max);
   }
 
   for (uint8_t i{0}; i < 10; ++i)
   {
-    ASSERT_TRUE(bin_->query(i));
+    ASSERT_TRUE(bin->query(i));
   }
 
 }

@@ -9,104 +9,124 @@
 #include "prefix/interfaces/i_pocket_dictionary.hpp"
 #include "prefix/simd/pocket_dictionary.hpp"
 
-class pocket_dictionary_test : public testing::Test
+// we need to use shared_ptrs here, because GetParam() uses the copy constructor
+// but we do not need to take care of performance inside the tests, so that's fine
+class pocket_dictionary_test : public testing::TestWithParam<std::shared_ptr<prefix::interfaces::i_pocket_dictionary>>
 {
 public:
   pocket_dictionary_test()
   {
-    this->pd_ = std::make_unique<prefix::simd::pocket_dictionary<25>>();
   }
 
-  std::unique_ptr<prefix::interfaces::i_pocket_dictionary> pd_;
 };
 
-TEST_F(pocket_dictionary_test, insert_linear)
+INSTANTIATE_TEST_SUITE_P(
+  all_pocket_dictionary_tests,
+  pocket_dictionary_test,
+  testing::Values(
+    std::make_shared<prefix::non_simd::pocket_dictionary<25>>(),
+    std::make_shared<prefix::simd::pocket_dictionary<25>>()
+  ));
+
+
+TEST_P(pocket_dictionary_test, insert_linear)
 {
+
+  auto pd{GetParam()};
 
   std::vector<uint8_t> compare_vector;
   for (uint8_t i{1}; i < 26; ++i)
   {
-    pd_->insert(i - 1, i);
-    ASSERT_EQ(pd_->size(), i);
+    pd->insert(i - 1, i);
+    ASSERT_EQ(pd->size(), i);
     compare_vector.push_back(i);
   }
 
   for (uint8_t i{1}; i < 26; ++i)
   {
-    ASSERT_TRUE(pd_->query(i - 1, i));
-    ASSERT_EQ((*pd_)[i - 1], compare_vector[i - 1]);
+    ASSERT_TRUE(pd->query(i - 1, i));
+    ASSERT_EQ((*pd)[i - 1], compare_vector[i - 1]);
   }
 }
 
-TEST_F(pocket_dictionary_test, insert_all_in_1_list)
+TEST_P(pocket_dictionary_test, insert_all_in_1_list)
 {
+
+  auto pd{GetParam()};
 
   std::vector<uint8_t> compare_vector;
   for (uint8_t i{1}; i < 26; ++i)
   {
-    pd_->insert(0, i);
-    ASSERT_EQ(pd_->size(), i);
+    pd->insert(0, i);
+    ASSERT_EQ(pd->size(), i);
     compare_vector.push_back(i);
   }
 
   for (uint8_t i{1}; i < 26; ++i)
   {
-    ASSERT_TRUE(pd_->query(0, i));
-    ASSERT_EQ((*pd_)[i - 1], compare_vector[i - 1]);
+    ASSERT_TRUE(pd->query(0, i));
+    ASSERT_EQ((*pd)[i - 1], compare_vector[i - 1]);
   }
 }
 
-TEST_F(pocket_dictionary_test, double_insert)
+TEST_P(pocket_dictionary_test, double_insert)
 {
+
+  auto pd{GetParam()};
 
   std::vector<uint8_t> compare_vector;
   for (uint8_t i{0}; i < 25; ++i)
   {
-    pd_->insert(i, i);
-    pd_->insert(i, i);
-    ASSERT_EQ(pd_->size(), i + 1);
+    pd->insert(i, i);
+    pd->insert(i, i);
+    ASSERT_EQ(pd->size(), i + 1);
     compare_vector.push_back(i);
   }
   for (uint8_t i{0}; i < 25; ++i)
   {
-    ASSERT_TRUE(pd_->query(i, i));
-    ASSERT_EQ((*pd_)[i], compare_vector[i]);
+    ASSERT_TRUE(pd->query(i, i));
+    ASSERT_EQ((*pd)[i], compare_vector[i]);
   }
 }
 
-TEST_F(pocket_dictionary_test, lists_of_size_2)
+TEST_P(pocket_dictionary_test, lists_of_size_2)
 {
+
+  auto pd{GetParam()};
 
   std::vector<uint8_t> compare_vector;
   for (uint8_t i{0}; i < 12; ++i)
   {
-    pd_->insert(i, i);
-    pd_->insert(i, i + 1);
-    ASSERT_EQ(pd_->size(), 2 * (i + 1));
+    pd->insert(i, i);
+    pd->insert(i, i + 1);
+    ASSERT_EQ(pd->size(), 2 * (i + 1));
     compare_vector.push_back(i);
     compare_vector.push_back(i + 1);
   }
 
   for (uint8_t i{0}; i < 12; ++i)
   {
-    ASSERT_TRUE(pd_->query(i, i));
-    ASSERT_TRUE(pd_->query(i, i + 1));
+    ASSERT_TRUE(pd->query(i, i));
+    ASSERT_TRUE(pd->query(i, i + 1));
   }
 
   for (uint8_t i{0}; i < 11; ++i)
   {
     for (uint8_t j{i}; j < i + 2; ++j)
     {
-      ASSERT_EQ((*pd_)[i], compare_vector[i]);
-      ASSERT_EQ((*pd_)[i + 1], compare_vector[i + 1]);
+      ASSERT_EQ((*pd)[i], compare_vector[i]);
+      ASSERT_EQ((*pd)[i + 1], compare_vector[i + 1]);
     }
 
   }
 }
 
 
-TEST_F(pocket_dictionary_test, random_insert_lists_of_5_linear)
+TEST_P(pocket_dictionary_test, random_insert_lists_of_5_linear)
 {
+
+  auto pd{GetParam()};
+
   std::random_device random_device;
 
   std::mt19937 mers{random_device()};
@@ -127,7 +147,7 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_linear)
   {
     for (uint8_t i{0}; i < 5; ++i)
     {
-      pd_->insert(list_index, rand_values[index]);
+      pd->insert(list_index, rand_values[index]);
       if (std::find(list.begin(), list.end(), rand_values[index]) == list.end())
       {
         list.push_back(rand_values[index]);
@@ -139,21 +159,24 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_linear)
   }
 
 
-  uint8_t pd_index{0};
+  uint8_t pdindex{0};
   for (list_index = 0; list_index < 5; ++list_index)
   {
     for (uint8_t j{0}; j < compare_array[list_index].size(); ++j)
     {
-      ASSERT_TRUE(pd_->query(list_index, compare_array[list_index][j]));
-      ASSERT_EQ((*pd_)[pd_index + j], compare_array[list_index][j]);
+      ASSERT_TRUE(pd->query(list_index, compare_array[list_index][j]));
+      ASSERT_EQ((*pd)[pdindex + j], compare_array[list_index][j]);
     }
-    pd_index += static_cast<uint8_t>(compare_array[list_index].size());
+    pdindex += static_cast<uint8_t>(compare_array[list_index].size());
   }
 }
 
 
-TEST_F(pocket_dictionary_test, random_insert_lists_of_1_shuffle)
+TEST_P(pocket_dictionary_test, random_insert_lists_of_1_shuffle)
 {
+
+  auto pd{GetParam()};
+
   std::random_device random_device;
 
   std::mt19937 mers{random_device()};
@@ -176,20 +199,23 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_1_shuffle)
 
   for (auto index : random_indices)
   {
-    pd_->insert(index, rand_values[index]);
+    pd->insert(index, rand_values[index]);
     compare_array[index] = rand_values[index];
   }
 
   for (auto index : random_indices)
   {
-    ASSERT_TRUE(pd_->query(index, rand_values[index]));
-    ASSERT_EQ((*pd_)[index], compare_array[index]);
+    ASSERT_TRUE(pd->query(index, rand_values[index]));
+    ASSERT_EQ((*pd)[index], compare_array[index]);
   }
 }
 
 
-TEST_F(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
+TEST_P(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
 {
+
+  auto pd{GetParam()};
+
   std::random_device random_device;
 
   std::mt19937 mers{random_device()};
@@ -217,7 +243,7 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
   {
     for (uint8_t i{0}; i < 5; ++i)
     {
-      pd_->insert(index, rand_values[current_index]);
+      pd->insert(index, rand_values[current_index]);
       if (std::find(compare_array[index].begin(), compare_array[index].end(), rand_values[current_index])
         == compare_array[index].end())
       {
@@ -228,15 +254,15 @@ TEST_F(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
     }
   }
 
-  uint8_t pd_index{0};
+  uint8_t pdindex{0};
   for (uint8_t list_index{0}; list_index < 5; ++list_index)
   {
     for (uint8_t j{0}; j < compare_array[list_index].size(); ++j)
     {
-      ASSERT_TRUE(pd_->query(list_index, compare_array[list_index][j]));
-      ASSERT_EQ((*pd_)[pd_index + j], compare_array[list_index][j]);
+      ASSERT_TRUE(pd->query(list_index, compare_array[list_index][j]));
+      ASSERT_EQ((*pd)[pdindex + j], compare_array[list_index][j]);
     }
-    pd_index += static_cast<uint8_t>(compare_array[list_index].size());
+    pdindex += static_cast<uint8_t>(compare_array[list_index].size());
   }
 
 }

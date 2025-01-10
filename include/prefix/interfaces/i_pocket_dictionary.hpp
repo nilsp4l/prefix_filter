@@ -6,6 +6,7 @@
 #define INCLUDE_PREFIX_INTERFACES_I_POCKET_DICTIONARY_HPP
 
 #include <cinttypes>
+#include <type_traits>
 
 namespace prefix::interfaces
 {
@@ -35,5 +36,6 @@ public:
   [[nodiscard]] virtual constexpr bool overflowed() const = 0;
 
 };
+
 }// namespace prefix::interfaces
 #endif //INCLUDE_PREFIX_INTERFACES_I_POCKET_DICTIONARY_HPP
