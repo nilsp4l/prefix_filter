@@ -209,7 +209,7 @@ namespace prefix::simd
 
     [[nodiscard]] constexpr uint8_t max() const override
     {
-      return data_[7 + k];
+      return data_[7 + k - 1];
     }
 
     constexpr void mark_overflowed() override
