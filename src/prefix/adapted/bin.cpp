@@ -124,6 +124,11 @@ void bin::set_overflowed() const
   (*data_) |= 0x80;
 }
 
+[[nodiscard]] constexpr bool bin::smaller_than_max(uint8_t fp)
+{
+  return true;
+}
+
 void bin::increase_size()
 {
   // we may ignore that the most significant bit is set, as we will never reach the point where incrementing will change that

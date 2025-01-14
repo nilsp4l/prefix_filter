@@ -22,6 +22,11 @@ public:
   constexpr virtual std::optional<uint8_t> insert(uint8_t fp) = 0;
 
   [[nodiscard]] constexpr virtual uint8_t size() const = 0;
+
+  [[nodiscard]] constexpr virtual bool overflowed() const = 0;
+
+  [[nodiscard]] constexpr virtual bool smaller_than_max(uint8_t fp) = 0;
+
 };
 }// namespace prefix::interfaces
 

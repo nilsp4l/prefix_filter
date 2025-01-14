@@ -28,7 +28,7 @@ public:
 
   ~bin() override;
 
-  uint8_t& operator[](const uint8_t index) const override;
+  uint8_t& operator[](uint8_t index) const override;
 
   [[nodiscard]] bool query(uint8_t r) const override;
 
@@ -36,9 +36,11 @@ public:
 
   [[nodiscard]] uint8_t size() const override;
 
-  [[nodiscard]] bool overflowed() const;
+  [[nodiscard]] bool overflowed() const override;
 
   void set_overflowed() const;
+
+  [[nodiscard]] constexpr bool smaller_than_max(uint8_t fp) override;
 
 private:
   void increase_size();
