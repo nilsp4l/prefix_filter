@@ -27,4 +27,5 @@ TEST_F(bloom_test, insert_10_elements)
   {
     ASSERT_TRUE(filter_.query(key));
   }
+
 }

@@ -10,13 +10,13 @@
 
 namespace prefix
 {
-template<typename key_t, std::size_t size>
+template<typename key_t, typename bin_t, std::size_t size>
 class prefix_filter
 {
 public:
   prefix_filter()
   {
-    bins_ = new bin<25, simd::pocket_dictionary<25>>[size]();
+    bins_ = new bin_t[size]();
   }
 
   ~prefix_filter()
@@ -59,7 +59,7 @@ private:
     return (upper_bits | lower_bits);
   }
 
-  bin<25, simd::pocket_dictionary<25>>* bins_;
+  bin_t* bins_;
   bloom_filter<uint16_t> bloom_;
 };
 }

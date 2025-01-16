@@ -7,6 +7,7 @@
 
 #include <cinttypes>
 #include "util/hash_functions.hpp"
+#include <iostream>
 
 template<typename key_t>
 class bloom_filter
@@ -26,7 +27,8 @@ public:
   {
     for (uint32_t position : util::bloom_hash_function<key_t, size << 3>::hash(key))
     {
-      data_[position / 8] |= util::bit_mask_position<uint8_t, util::bit_mask_right<uint8_t, 3>::value>::value;
+      data_[position / 8] |= (util::bit_mask_position_rt<uint8_t>::value(
+        position & util::bit_mask_right<uint8_t, 3>::value)); // position % 8
     }
   }
 
@@ -34,7 +36,8 @@ public:
   {
     for (uint32_t position : util::bloom_hash_function<key_t, size << 3>::hash(key))
     {
-      if (!(data_[position / 8] & util::bit_mask_position<uint8_t, util::bit_mask_right<uint8_t, 3>::value>::value))
+      if (!(data_[position / 8] & (util::bit_mask_position_rt<uint8_t>::value(
+        position & util::bit_mask_right<uint8_t, 3>::value)))) // position % 8
       {
         return false;
       }
