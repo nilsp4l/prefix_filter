@@ -37,7 +37,7 @@ public:
     return data_[7 + index];
   }
 
-  [[nodiscard]] constexpr bool query(const uint8_t q, const uint8_t r) const override
+  [[nodiscard]] bool query(const uint8_t q, const uint8_t r) const override
   {
     auto index{get_list_index(q)};
     uint8_t list_size{get_list_size(index[0] + index[1])};
@@ -51,7 +51,7 @@ public:
     return false;
   }
 
-  constexpr void insert(const uint8_t q, const uint8_t r) override
+  void insert(const uint8_t q, const uint8_t r) override
   {
 
     // q is greater than the amount of lists there is or already k elements in data_
@@ -71,13 +71,13 @@ public:
 
   }
 
-  [[nodiscard]] constexpr uint8_t size() const override
+  [[nodiscard]] uint8_t size() const override
   {
     auto header{get_header()};
-    return static_cast<uint8_t>(std::popcount(header));
+    return static_cast<uint8_t>(_mm_popcnt_u64(header));
   }
 
-  constexpr void max_move_procedure() override
+  void max_move_procedure() override
   {
     auto q{find_biggest_q()};
     set_biggest_q(q);
@@ -103,7 +103,7 @@ public:
   }
 
   // it is assumed that the max has already been set. otherwise u.b.
-  constexpr void evict_max() override
+  void evict_max() override
   {
     const uint8_t biggest_q{get_biggest_q()};
     const auto list_indices{get_list_index(biggest_q)};
@@ -116,21 +116,21 @@ public:
     set_header(header);
   }
 
-  [[nodiscard]] constexpr uint8_t max() const override
+  [[nodiscard]] uint8_t max() const override
   {
     assert(overflowed());
 
     return this->operator[](k - 1);
   }
 
-  constexpr void mark_overflowed() override
+  void mark_overflowed() override
   {
     uint64_t header_reg{get_header_reg()};
     header_reg |= util::bit_mask_position<uint64_t, (k << 1)>::value;
     set_header_reg(header_reg);
   }
 
-  [[nodiscard]] constexpr bool overflowed() const override
+  [[nodiscard]] bool overflowed() const override
   {
     return get_header_reg() & (util::bit_mask_position<uint64_t, (k << 1)>::value);
   }

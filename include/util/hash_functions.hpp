@@ -68,7 +68,6 @@ struct most_significant_based_fp<25>
 };
 
 template<typename key_t, uint32_t size>
-requires (std::popcount(size) == 1)
 struct bloom_hash_function
 {
 
@@ -91,21 +90,15 @@ struct prefix_fingerprint
 
 };
 
-template<>
-struct prefix_fingerprint<uint64_t, 1000000>
+template<std::size_t size>
+struct prefix_fingerprint<uint64_t, size>
 {
   constexpr static std::pair<std::size_t, uint8_t> fp(uint64_t key)
   {
     std::pair<std::size_t, uint8_t> to_return;
 
-    to_return.first = key % 1000000;
-    auto current_bit{bit_mask_right<uint8_t, 0>::value};
-    while (key)
-    {
-      to_return.second += current_bit & static_cast<uint8_t>(key);
-      key >>= 8;
-      current_bit <<= 1;
-    }
+    to_return.first = key % size;
+    to_return.second = key & UINT8_MAX;
 
     return to_return;
   }

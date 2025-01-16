@@ -19,6 +19,24 @@ public:
     bins_ = new bin_t[size]();
   }
 
+  prefix_filter(prefix_filter<key_t, bin_t, size>&& other) noexcept
+  {
+    {
+      bins_ = other.bins_;
+      other.bins_ = nullptr;
+      bloom_ = std::move(other.bloom_);
+    }
+  }
+
+  prefix_filter& operator=(prefix_filter<key_t, bin_t, size>&& other) noexcept
+  {
+
+    bins_ = std::move(other.bins_);
+    other.bins_ = nullptr;
+    bloom_ = std::move(other.bloom_);
+    return *this;
+  }
+
   ~prefix_filter()
   {
     delete[] bins_;
@@ -59,7 +77,7 @@ private:
     return (upper_bits | lower_bits);
   }
 
-  bin_t* bins_;
+  bin_t* bins_{nullptr};
   bloom_filter<uint16_t> bloom_;
 };
 }

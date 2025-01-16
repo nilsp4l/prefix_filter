@@ -18,6 +18,19 @@ public:
     data_ = new uint8_t[size]();
   }
 
+  bloom_filter(bloom_filter<key_t>&& other)
+  {
+    data_ = other.data_;
+    other.data_ = nullptr;
+  }
+
+  bloom_filter& operator=(bloom_filter<key_t>&& other) noexcept
+  {
+    data_ = other.data_;
+    other.data_ = nullptr;
+    return *this;
+  }
+
   ~bloom_filter()
   {
     delete[] data_;

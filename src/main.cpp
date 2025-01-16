@@ -7,13 +7,19 @@
 int main()
 {
 
-  prefix::prefix_filter<uint64_t, prefix::bin<25, prefix::non_simd::pocket_dictionary<25>>, 1000000> pf{};
+  prefix::prefix_filter<uint64_t, prefix::bin<25, prefix::simd::pocket_dictionary<25>>, 1000> pf{};
 
-  for (uint64_t i{0}; i < 252329329; ++i)
+  for (uint64_t i{0}; i < 10000; ++i)
   {
     pf.insert(i);
   }
 
 
+  pf = prefix::prefix_filter<uint64_t, prefix::bin<25, prefix::simd::pocket_dictionary<25>>, 1000>();
+
+  for (uint64_t i{0}; i < 10000; ++i)
+  {
+    pf.insert(i);
+  }
   return 0;
 }

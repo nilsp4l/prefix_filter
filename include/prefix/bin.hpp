@@ -28,17 +28,20 @@ public:
 
   ~bin() override = default;
 
+  bin(bin<k, pocket_dictionary_t>&& other) noexcept = default;
+  bin& operator=(bin<k, pocket_dictionary_t>&& other) noexcept = default;
+
   uint8_t& operator[](const uint8_t index) const override
   {
     return pd_[index];
   }
 
-  [[nodiscard]] constexpr bool query(uint8_t fp) const override
+  [[nodiscard]] bool query(uint8_t fp) const override
   {
     return pd_.query(util::most_significant_based_fp<k>::fingerprint(fp), fp);
   }
 
-  constexpr std::optional<uint8_t> insert(uint8_t fp) override
+  std::optional<uint8_t> insert(uint8_t fp) override
   {
     if (pd_.size() == k && !pd_.overflowed())
     {
@@ -66,17 +69,17 @@ public:
     return max;
   }
 
-  [[nodiscard]] constexpr uint8_t size() const override
+  [[nodiscard]] uint8_t size() const override
   {
     return pd_.size();
   }
 
-  [[nodiscard]] constexpr virtual bool overflowed() const override
+  [[nodiscard]] bool overflowed() const override
   {
     return pd_.overflowed();
   }
 
-  [[nodiscard]] constexpr virtual bool smaller_than_max(uint8_t fp) override
+  [[nodiscard]] bool smaller_than_max(uint8_t fp) override
   {
     return fp < pd_.max();
   }

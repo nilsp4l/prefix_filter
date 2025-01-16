@@ -124,7 +124,7 @@ void bin::set_overflowed() const
   (*data_) |= 0x80;
 }
 
-[[nodiscard]] constexpr bool bin::smaller_than_max(uint8_t fp)
+[[nodiscard]] bool bin::smaller_than_max(uint8_t fp)
 {
   return true;
 }
