@@ -40,7 +40,7 @@ public:
 
   void set_overflowed() const;
 
-  [[nodiscard]] bool smaller_than_max(uint8_t fp) override;
+  [[nodiscard]] bool greater_than_max(uint8_t fp) override;
 
 private:
   void increase_size();

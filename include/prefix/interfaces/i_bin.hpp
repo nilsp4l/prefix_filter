@@ -25,7 +25,7 @@ public:
 
   [[nodiscard]] virtual bool overflowed() const = 0;
 
-  [[nodiscard]] virtual bool smaller_than_max(uint8_t fp) = 0;
+  [[nodiscard]] virtual bool greater_than_max(uint8_t fp) = 0;
 
 };
 }// namespace prefix::interfaces

@@ -60,12 +60,13 @@ public:
       return bins_[fp.first].query(fp.second);
     }
 
-    if (bins_[fp.first].smaller_than_max(fp.second))
+    if (bins_[fp.first].greater_than_max(fp.second))
     {
       return bloom_.query(create_bloom_key(fp));
     }
 
-    return false;
+    return bins_[fp.first].query(fp.second);
+
   }
 
 private:

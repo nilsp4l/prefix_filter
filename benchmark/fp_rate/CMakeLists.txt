@@ -1,0 +1,1 @@
+add_executable(fp_rate_benchmark fp_rate_benchmark.cpp)

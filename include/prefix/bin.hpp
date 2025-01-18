@@ -38,6 +38,7 @@ public:
 
   [[nodiscard]] bool query(uint8_t fp) const override
   {
+    //std::cout << std::to_string(pd_.max()) << std::endl;
     return pd_.query(util::most_significant_based_fp<k>::fingerprint(fp), fp);
   }
 
@@ -79,9 +80,9 @@ public:
     return pd_.overflowed();
   }
 
-  [[nodiscard]] bool smaller_than_max(uint8_t fp) override
+  [[nodiscard]] bool greater_than_max(uint8_t fp) override
   {
-    return fp < pd_.max();
+    return fp > pd_.max();
   }
 
 private:

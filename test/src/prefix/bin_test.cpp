@@ -18,12 +18,10 @@ public:
 
 };
 
-
-INSTANTIATE_TEST_CASE_P(all_bin_tests, bin_test, testing::Values(
+INSTANTIATE_TEST_SUITE_P(all_bin_tests, bin_test, testing::Values(
   std::make_shared<prefix::bin<25, prefix::non_simd::pocket_dictionary<25>>>(),
   std::make_shared<prefix::bin<25, prefix::simd::pocket_dictionary<25>>>()
 ));
-
 
 TEST_P(bin_test, random_insert_lookup_size_10)
 {
@@ -124,7 +122,6 @@ TEST_P(bin_test, linear_insert_max_set_once)
   ASSERT_TRUE(bin->query(24));
 }
 
-
 TEST_P(bin_test, insert_10_max_switches)
 {
 
@@ -151,6 +148,6 @@ TEST_P(bin_test, insert_10_max_switches)
   {
     ASSERT_TRUE(bin->query(i));
   }
-
 }
+
 

@@ -124,9 +124,11 @@ void bin::set_overflowed() const
   (*data_) |= 0x80;
 }
 
-[[nodiscard]] bool bin::smaller_than_max(uint8_t fp)
+[[nodiscard]] bool bin::greater_than_max(uint8_t fp)
 {
-  return true;
+  auto r_reg{_mm256_set1_epi8(static_cast<int8_t>(fp))};
+  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data_))};
+  return _mm256_movemask_epi8(_mm256_cmpeq_epi8(r_reg, _mm256_max_epu8(r_reg, pd_reg)));
 }
 
 void bin::increase_size()

@@ -20,14 +20,14 @@ const __m128i reg_128_all_set{_mm_set1_epi64x(0xffffffffffffffff)};
 template<typename numberT, uint8_t position>
 struct bit_mask_position
 {
-  static constexpr numberT
+  static inline constexpr numberT
     value{static_cast<numberT>(static_cast<numberT>(1) << ((sizeof(numberT) << 3) - (position + 1)))};
 };
 
 template<typename numberT>
 struct bit_mask_position_rt
 {
-  static constexpr numberT value(uint8_t position)
+  static inline constexpr numberT value(uint8_t position)
   {
     return static_cast<numberT>(static_cast<numberT>(1) << ((sizeof(numberT) << 3) - (position + 1)));
   }
@@ -38,14 +38,14 @@ struct bit_mask_position_rt
 template<typename numberT, uint8_t position>
 struct bit_mask_left
 {
-  static constexpr numberT
+  static inline constexpr numberT
     value{static_cast<numberT>(~((static_cast<numberT>(1) << ((sizeof(numberT) << 3) - (position + 1))) - 1))};
 };
 
 template<typename numberT>
 struct bit_mask_left_rt
 {
-  static constexpr numberT value(uint8_t position)
+  static inline constexpr numberT value(uint8_t position)
   {
     return static_cast<numberT>(~((static_cast<numberT>(1) << ((sizeof(numberT) << 3) - (position + 1))) - 1));
   }
@@ -56,14 +56,14 @@ struct bit_mask_left_rt
 template<typename numberT, uint8_t position>
 struct bit_mask_right
 {
-  static constexpr numberT
+  static inline constexpr numberT
     value{static_cast<numberT>((static_cast<numberT>(1) << position) - 1)};
 };
 
 template<typename numberT>
 struct bit_mask_right_rt
 {
-  static constexpr numberT value(uint8_t position)
+  static inline constexpr numberT value(uint8_t position)
   {
     return static_cast<numberT>(static_cast<numberT>((static_cast<numberT>(1) << position) - 1));
   }
@@ -72,7 +72,7 @@ struct bit_mask_right_rt
 template<uint8_t offset>
 struct reg_128_bit_mask_left
 {
-  static constexpr __m128i value()
+  static inline constexpr __m128i value()
   {
     return _mm_slli_si128(reg_128_all_set, 16 - offset);
   }
@@ -81,7 +81,7 @@ struct reg_128_bit_mask_left
 template<uint8_t offset>
 struct reg_128_bit_mask_right
 {
-  static constexpr __m128i value()
+  static inline constexpr __m128i value()
   {
     return _mm_srli_si128(reg_128_all_set, 16 - offset);
   }
@@ -89,7 +89,7 @@ struct reg_128_bit_mask_right
 
 struct reg_128_bit_mask_right_rt
 {
-  static constexpr __m128i value(uint8_t offset)
+  static inline constexpr __m128i value(uint8_t offset)
   {
     switch (offset)
     {
@@ -136,7 +136,7 @@ struct reg_128_bit_mask_right_rt
 
 struct reg_128_bit_mask_left_rt
 {
-  static constexpr __m128i value(uint8_t offset)
+  static inline constexpr __m128i value(uint8_t offset)
   {
     switch (offset)
     {

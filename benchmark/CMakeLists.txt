@@ -5,6 +5,9 @@ add_executable(
 )
 
 
-target_link_libraries(prefix_benchmarking benchmark::benchmark)
+target_link_libraries(prefix_benchmarking prefix_adapted benchmark::benchmark)
 
 target_include_directories(prefix_benchmarking PUBLIC ${PROJECT_SOURCE_DIR}/include)
+
+
+add_subdirectory(fp_rate)

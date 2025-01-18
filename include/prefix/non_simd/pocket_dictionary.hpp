@@ -43,6 +43,7 @@ public:
     uint8_t list_size{get_list_size(index[0] + index[1])};
     for (uint8_t i{index[1]}; i < index[1] + list_size; ++i)
     {
+      uint8_t foo = this->operator[](i);
       if (this->operator[](i) == r)
       {
         return true;

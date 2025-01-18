@@ -19,7 +19,7 @@ namespace util
 template<uint8_t Q>
 struct most_significant_based_fp
 {
-  constexpr static uint8_t fingerprint(uint8_t)
+  constexpr inline static uint8_t fingerprint(uint8_t)
   {
     return 0;
   };
@@ -28,7 +28,7 @@ struct most_significant_based_fp
 template<>
 struct most_significant_based_fp<25>
 {
-  constexpr static uint8_t fingerprint(uint8_t r)
+  constexpr inline static uint8_t fingerprint(uint8_t r)
   {
     r = r & bit_mask_left<uint8_t, 5>::value;
     r >>= 3;
@@ -75,7 +75,7 @@ struct bloom_hash_function
 template<>
 struct bloom_hash_function<uint16_t, 4096>
 {
-  constexpr static std::array<uint32_t, 3> hash(uint16_t key)
+  constexpr inline static std::array<uint32_t, 3> hash(uint16_t key)
   {
     return {
       static_cast<uint32_t>(key) & (256 - 1), static_cast<uint32_t>(key) & (1024 - 1),
@@ -93,7 +93,7 @@ struct prefix_fingerprint
 template<std::size_t size>
 struct prefix_fingerprint<uint64_t, size>
 {
-  constexpr static std::pair<std::size_t, uint8_t> fp(uint64_t key)
+  constexpr inline static std::pair<std::size_t, uint8_t> fp(uint64_t key)
   {
     std::pair<std::size_t, uint8_t> to_return;
 
