@@ -16,14 +16,15 @@ class prefix_filter
 public:
   prefix_filter()
   {
-    bins_ = new bin_t[size]();
+    // size * 32 (32 is the size of one pd)
+    data_ = new uint8_t[size << 5]();
   }
 
   prefix_filter(prefix_filter<key_t, bin_t, size>&& other) noexcept
   {
     {
-      bins_ = other.bins_;
-      other.bins_ = nullptr;
+      data_ = other.data_;
+      other.data_ = nullptr;
       bloom_ = std::move(other.bloom_);
     }
   }
@@ -31,55 +32,49 @@ public:
   prefix_filter& operator=(prefix_filter<key_t, bin_t, size>&& other) noexcept
   {
 
-    bins_ = std::move(other.bins_);
-    other.bins_ = nullptr;
+    data_ = other.data_;
+    other.data_ = nullptr;
     bloom_ = std::move(other.bloom_);
     return *this;
   }
 
   ~prefix_filter()
   {
-    delete[] bins_;
+    delete[] data_;
   }
 
   void insert(key_t key)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
-    auto insert_return{bins_[fp.first].insert(fp.second)};
+    auto insert_return{bin_t::insert(fp.second, data_ + (fp.first << 5))};
     if (insert_return)
     {
-      bloom_.insert(create_bloom_key(fp));
+      bloom_.insert(fp);
     }
   }
 
   bool query(key_t key)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
-    if (!bins_[fp.first].overflowed())
+    if (!bin_t::overflowed(data_ + (fp.first << 5)))
     {
-      return bins_[fp.first].query(fp.second);
+      return bin_t::query(fp.second, data_ + (fp.first << 5));
     }
 
-    if (bins_[fp.first].greater_than_max(fp.second))
+    if (bin_t::greater_than_max(fp.second, data_ + (fp.first << 5)))
     {
-      return bloom_.query(create_bloom_key(fp));
+      return bloom_.query(fp);
     }
 
-    return bins_[fp.first].query(fp.second);
+    return bin_t::query(fp.second, data_ + (fp.first << 5));
 
   }
 
 private:
 
-  uint16_t create_bloom_key(std::pair<std::size_t, uint8_t> fp)
-  {
-    uint16_t upper_bits{static_cast<uint16_t>(static_cast<uint8_t>(fp.first % size) << 8)};
-    uint16_t lower_bits{static_cast<uint16_t>(fp.second)};
-    return (upper_bits | lower_bits);
-  }
 
-  bin_t* bins_{nullptr};
-  bloom_filter<uint16_t> bloom_;
+  uint8_t* data_{nullptr};
+  bloom_filter<uint16_t, 10485706> bloom_;
 };
 }
 

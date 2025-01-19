@@ -9,7 +9,6 @@
 #include <array>
 #include <iostream>
 #include <functional>
-#include "prefix/interfaces/i_bin.hpp"
 #include "util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
 #include "prefix/simd/pocket_dictionary.hpp"
@@ -18,75 +17,59 @@
 namespace prefix
 {
 template<uint8_t k, typename pocket_dictionary_t>
-class bin : public interfaces::i_bin
+class bin
 {
 public:
-  explicit bin()
+
+
+  static constexpr bool query(uint8_t fp, uint8_t* data)
   {
-    static_assert(k <= 25);
+    //std::cout << std::to_string(pocket_dictionary_t::max()) << std::endl;
+    return pocket_dictionary_t::query(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
   }
 
-  ~bin() override = default;
-
-  bin(bin<k, pocket_dictionary_t>&& other) noexcept = default;
-  bin& operator=(bin<k, pocket_dictionary_t>&& other) noexcept = default;
-
-  uint8_t& operator[](const uint8_t index) const override
+  static constexpr std::optional<uint8_t> insert(uint8_t fp, uint8_t* data)
   {
-    return pd_[index];
-  }
-
-  [[nodiscard]] bool query(uint8_t fp) const override
-  {
-    //std::cout << std::to_string(pd_.max()) << std::endl;
-    return pd_.query(util::most_significant_based_fp<k>::fingerprint(fp), fp);
-  }
-
-  std::optional<uint8_t> insert(uint8_t fp) override
-  {
-    if (pd_.size() == k && !pd_.overflowed())
+    if (pocket_dictionary_t::size(data) == k && !pocket_dictionary_t::overflowed(data))
     {
-      pd_.mark_overflowed();
-      pd_.max_move_procedure();
+      pocket_dictionary_t::mark_overflowed(data);
+      pocket_dictionary_t::max_move_procedure(data);
     }
 
-    if (!pd_.overflowed())
+    if (!pocket_dictionary_t::overflowed(data))
     {
-      pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
+      pocket_dictionary_t::insert(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
       return std::nullopt;
     }
 
-    uint8_t max{pd_.max()};
+    uint8_t max{pocket_dictionary_t::max(data)};
 
     if (fp > max)
     {
       return fp;
     }
 
-    pd_.evict_max();
-    pd_.insert(util::most_significant_based_fp<k>::fingerprint(fp), fp);
-    pd_.max_move_procedure();
+    pocket_dictionary_t::evict_max(data);
+    pocket_dictionary_t::insert(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
+    pocket_dictionary_t::max_move_procedure(data);
 
     return max;
   }
 
-  [[nodiscard]] uint8_t size() const override
+  static constexpr uint8_t size(uint8_t* data)
   {
-    return pd_.size();
+    return pocket_dictionary_t::size(data);
   }
 
-  [[nodiscard]] bool overflowed() const override
+  static constexpr bool overflowed(uint8_t* data)
   {
-    return pd_.overflowed();
+    return pocket_dictionary_t::overflowed(data);
   }
 
-  [[nodiscard]] bool greater_than_max(uint8_t fp) override
+  static constexpr bool greater_than_max(uint8_t fp, uint8_t* data)
   {
-    return fp > pd_.max();
+    return fp > pocket_dictionary_t::max(data);
   }
-
-private:
-  pocket_dictionary_t pd_{};
 
 };
 } // namespace prefix

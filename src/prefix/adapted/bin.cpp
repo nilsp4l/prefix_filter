@@ -5,67 +5,54 @@
 #include "prefix/adapted/bin.hpp"
 namespace prefix::adapted
 {
-bin::bin()
-{
-  data_ = new uint8_t[32]();
-}
 
-bin::~bin()
-{
-  delete[] data_;
-}
 
-uint8_t& bin::operator[](const uint8_t index) const
+bool bin::query(uint8_t r, uint8_t* data)
 {
-  return data_[1 + index];
-}
-
-[[nodiscard]] bool bin::query(uint8_t r) const
-{
-  if (!size())
+  if (!size(data))
   {
     return false;
   }
 
 // loadu may be used, as we never cross cache lines
-  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data_))};
+  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data))};
 
 // ignore the lowest byte
 
   auto cmp_result{_mm256_cmpeq_epi8(pd_reg, _mm256_set1_epi8(static_cast<int8_t>(r)))};
 
-  return ((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size())) << 1) != 0);
+  return ((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data))) << 1) != 0);
 }
 
-std::optional<uint8_t> bin::insert(uint8_t r)
+std::optional<uint8_t> bin::insert(uint8_t r, uint8_t* data)
 {
 // Because of the overflowed procedure:
 // query code is copied here and not called, because the _mm256_set1_epi8 instruction is sequential
 // doing that twice would be wasteful. Furthermore, the loaded register is still relevant
 
-  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data_))};
+  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data))};
 
   auto r_reg{_mm256_set1_epi8(static_cast<int8_t>(r))};
 
   auto cmp_result{_mm256_cmpeq_epi8(pd_reg, r_reg)};
 
-  auto valid_elements_mask{util::bit_mask_right_rt<int>::value(size()) << 1};
+  auto valid_elements_mask{util::bit_mask_right_rt<int>::value(size(data)) << 1};
 
   if ((_mm256_movemask_epi8(cmp_result) & valid_elements_mask) != 0)
   {
     return std::nullopt;
   }
 
-  if (size() == 31)
+  if (size(data) == 31)
   {
-    set_overflowed();
+    set_overflowed(data);
   }
 
-  if (!overflowed())
+  if (!overflowed(data))
   {
-    data_[size() + 1] = r;
+    data[size(data) + 1] = r;
 
-    increase_size();
+    increase_size(data);
     return std::nullopt;
 
   }
@@ -92,49 +79,49 @@ std::optional<uint8_t> bin::insert(uint8_t r)
 
   while (max_element_positions)
   {
-    if ((max_element_positions & util::bit_mask_position<int, 31>::value) && data_[1 + current_index] > max_value)
+    if ((max_element_positions & util::bit_mask_position<int, 31>::value) && data[1 + current_index] > max_value)
     {
-      max_value = data_[1 + current_index];
+      max_value = data[1 + current_index];
       max_index = current_index;
     }
     max_element_positions >>= 1;
     ++current_index;
   }
 
-  uint8_t max{data_[1 + max_index]};
+  uint8_t max{data[1 + max_index]};
 
-  data_[1 + max_index] = r;
+  data[1 + max_index] = r;
 
   return max;
 
 }
 
-[[nodiscard]] uint8_t bin::size() const
+uint8_t bin::size(uint8_t* data)
 {
-  return (*data_ & util::bit_mask_right<uint8_t, 5>::value);
+  return (*data & util::bit_mask_right<uint8_t, 5>::value);
 }
 
-[[nodiscard]] bool bin::overflowed() const
+bool bin::overflowed(uint8_t* data)
 {
-  return util::bit_mask_position<uint8_t, 0>::value & *data_;
+  return util::bit_mask_position<uint8_t, 0>::value & *data;
 }
 
-void bin::set_overflowed() const
+void bin::set_overflowed(uint8_t* data)
 {
-  (*data_) |= 0x80;
+  (*data) |= 0x80;
 }
 
-[[nodiscard]] bool bin::greater_than_max(uint8_t fp)
+bool bin::greater_than_max(uint8_t fp, uint8_t* data)
 {
   auto r_reg{_mm256_set1_epi8(static_cast<int8_t>(fp))};
-  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data_))};
+  auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data))};
   return _mm256_movemask_epi8(_mm256_cmpeq_epi8(r_reg, _mm256_max_epu8(r_reg, pd_reg)));
 }
 
-void bin::increase_size()
+void bin::increase_size(uint8_t* data)
 {
   // we may ignore that the most significant bit is set, as we will never reach the point where incrementing will change that
   // as we are just manipulating the least significant 5 bits and not more here
-  ++(*data_);
+  ++(*data);
 }
 }

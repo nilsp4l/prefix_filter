@@ -10,57 +10,30 @@
 #include <optional>
 #include <iostream>
 
-#include "prefix/interfaces/i_pocket_dictionary.hpp"
 #include "util/masks.hpp"
 
 namespace prefix::simd
 {
 template<std::size_t k>
-class pocket_dictionary : public interfaces::i_pocket_dictionary
+class pocket_dictionary
 {
 public:
-  pocket_dictionary()
-  {
-    static_assert(k <= 25);
-    data_ = new uint8_t[32]();
-  }
 
-  ~pocket_dictionary() override
-  {
-    delete[] data_;
-  }
 
-  pocket_dictionary(pocket_dictionary<k>&& other) noexcept
+  static constexpr bool query(uint8_t q, uint8_t r, uint8_t* data)
   {
-    data_ = other.data_;
-    other.data_ = nullptr;
-  }
-
-  pocket_dictionary& operator=(pocket_dictionary<k>&& other) noexcept
-  {
-    data_ = other.data_;
-    other.data_ = nullptr;
-  }
-
-  uint8_t& operator[](const uint8_t index) const override
-  {
-    return data_[7 + index];
-  }
-
-  [[nodiscard]] bool query(uint8_t q, uint8_t r) const override
-  {
-    if (!size())
+    if (!size(data))
     {
       return false;
     }
 
     // loadu may be used, as we never cross cache lines
-    auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data_))};
+    auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data))};
 
     // ignore the lowest byte
 
     auto cmp_result{_mm256_cmpeq_epi8(pd_reg, _mm256_set1_epi8(static_cast<int8_t>(r)))};
-    auto matches{((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size()) << 7)) >> 7)};
+    auto matches{((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data)) << 7)) >> 7)};
 
     // cutdown of queries as described in the paper
     if (matches == 0)
@@ -72,7 +45,7 @@ public:
 
     // we do not ignore the redundant bits + first element here by and'ing it with 0
     // because it is not necessary, as the matches mask will turn 0 before we reach there
-    auto header{get_header()};
+    auto header{get_header(data)};
     uint8_t current_list{0};
     while (matches)
     {
@@ -95,9 +68,9 @@ public:
     return false;
   }
 
-  void insert(uint8_t q, uint8_t r) override
+  static constexpr void insert(uint8_t q, uint8_t r, uint8_t* data)
   {
-    auto header{get_header()};
+    auto header{get_header(data)};
     uint8_t q_cpy{q};
     uint8_t body_position{0};
     uint8_t header_position{0};
@@ -121,7 +94,7 @@ public:
     // find the end of the list
     while (header & util::bit_mask_position<uint64_t, 0>::value)
     {
-      if (data_[body_position + 7] == r)
+      if (data[body_position + 7] == r)
       {
         return;
       }
@@ -130,21 +103,21 @@ public:
       header <<= 1;
     }
 
-    insert_into_body(body_position, r);
-    insert_into_header(header_position);
+    insert_into_body(body_position, r, data);
+    insert_into_header(header_position, data);
   }
 
-  [[nodiscard]] uint8_t size() const override
+  static constexpr uint8_t size(uint8_t* data)
   {
-    return static_cast<uint8_t>(_mm_popcnt_u64(get_header() & util::bit_mask_left<uint64_t, 49>::value));
+    return static_cast<uint8_t>(_mm_popcnt_u64(get_header(data) & util::bit_mask_left<uint64_t, 49>::value));
   }
 
-  void evict_max() override
+  static constexpr void evict_max(uint8_t* data)
   {
-    const uint8_t biggest_q{get_biggest_q()};
+    const uint8_t biggest_q{get_biggest_q(data)};
     uint8_t q_copy{biggest_q};
     uint8_t body_index{0};
-    auto header{get_header()};
+    auto header{get_header(data)};
     while (q_copy)
     {
       if (!(header & util::bit_mask_position<uint64_t, 0>::value))
@@ -159,7 +132,7 @@ public:
     }
 
 
-    header = get_header();
+    header = get_header(data);
     uint64_t last_bits{header & util::bit_mask_right<uint64_t, 14>::value};
     header &= util::bit_mask_left<uint64_t, 49>::value;
     uint64_t up_to_deletion
@@ -167,16 +140,16 @@ public:
     header <<= biggest_q + body_index + 1;
     header >>= biggest_q + body_index;
     header |= up_to_deletion;
-    set_header(header | last_bits);
+    set_header(header | last_bits, data);
   }
 
-  void max_move_procedure() override
+  static constexpr void max_move_procedure(uint8_t* data)
   {
     // find the biggest q
     uint8_t q{0};
     uint8_t body_index{0};
     uint8_t current_list_size{0};
-    auto header{get_header() & util::bit_mask_left<uint64_t, 49>::value};
+    auto header{get_header(data) & util::bit_mask_left<uint64_t, 49>::value};
     while (header)
     {
       if (!(header & util::bit_mask_left<uint64_t, 0>::value))
@@ -193,72 +166,72 @@ public:
     }
 
     // set the biggest q in the redundant bits as proposed in the paper for whatever reason
-    uint64_t header_reg{get_header() & util::bit_mask_left<uint64_t, 55>::value};
-    uint64_t header_up_to_q{get_header() & util::bit_mask_right<uint64_t, 8>::value};
+    uint64_t header_reg{get_header(data) & util::bit_mask_left<uint64_t, 55>::value};
+    uint64_t header_up_to_q{get_header(data) & util::bit_mask_right<uint64_t, 8>::value};
     uint64_t biggest_q_position{~(util::bit_mask_left<uint64_t, 4>::value
       >> 51)}; // keep everything except for the biggest_q_position to clear it
     header_reg &= biggest_q_position;
     uint64_t new_biggest_q_64{static_cast<uint64_t>(q)};
     new_biggest_q_64 <<= 8;
     header_reg |= new_biggest_q_64;
-    set_header(header_reg | header_up_to_q);
+    set_header(header_reg | header_up_to_q, data);
 
     // at this point it is faster to search for the maximum in the last non-empty list linearely,
     // rather than doing simd
 
     uint8_t current_max{0};
     uint8_t current_max_index{body_index};
-    for (uint8_t i{body_index}; i < size(); ++i)
+    for (uint8_t i{body_index}; i < size(data); ++i)
     {
-      if (data_[7 + i] > current_max)
+      if (data[7 + i] > current_max)
       {
-        current_max = data_[7 + i];
+        current_max = data[7 + i];
         current_max_index = i;
       }
     }
 
-    data_[7 + current_max_index] = data_[7 + size() - 1];
-    data_[7 + size() - 1] = current_max;
+    data[7 + current_max_index] = data[7 + size(data) - 1];
+    data[7 + size(data) - 1] = current_max;
   }
 
-  [[nodiscard]] uint8_t max() const override
+  static constexpr uint8_t max(uint8_t* data)
   {
-    return data_[7 + k - 1];
+    return data[7 + k - 1];
   }
 
-  void mark_overflowed() override
+  static constexpr void mark_overflowed(uint8_t* data)
   {
-    set_header(get_header() | util::bit_mask_position<uint64_t, 50>::value);
+    set_header(get_header(data) | util::bit_mask_position<uint64_t, 50>::value, data);
   }
 
-  [[nodiscard]] bool overflowed() const override
+  static constexpr bool overflowed(uint8_t* data)
   {
-    return get_header() & util::bit_mask_position<uint64_t, 50>::value;
+    return get_header(data) & util::bit_mask_position<uint64_t, 50>::value;
   }
 
 private:
-  constexpr uint8_t get_biggest_q()
+  static constexpr uint8_t get_biggest_q(uint8_t* data)
   {
-    uint64_t header_reg{get_header() & util::bit_mask_left<uint64_t, 55>::value};
+    uint64_t header_reg{get_header(data) & util::bit_mask_left<uint64_t, 55>::value};
     header_reg >>= 8;                                        // move the position of q into the least significant 5 bits
     header_reg &= ~util::bit_mask_left<uint64_t, 58>::value; // 0 everything except for the least significant 5 bits
     return static_cast<uint8_t>(header_reg);                 // ignore everything except for the first four bits
   }
 
-  constexpr void set_header(uint64_t new_header)
+  static constexpr void set_header(uint64_t new_header, uint8_t* data)
   {
-    *reinterpret_cast<uint64_t*>(data_) = __builtin_bswap64(new_header);
+    *reinterpret_cast<uint64_t*>(data) = __builtin_bswap64(new_header);
   }
 
-  [[nodiscard]] constexpr uint64_t get_header() const
+  static constexpr uint64_t get_header(uint8_t* data)
   {
 
-    return (__builtin_bswap64((*reinterpret_cast<uint64_t*>(data_))));
+    return (__builtin_bswap64((*reinterpret_cast<uint64_t*>(data))));
   }
 
-  constexpr void insert_into_header(uint8_t index)
+  static constexpr void insert_into_header(uint8_t index, uint8_t* data)
   {
-    uint64_t header{get_header()};
+    uint64_t header{get_header(data)};
 
     uint64_t up_to_insertion{(util::bit_mask_left_rt<uint64_t>::value(index) & header)};
     // element in last position + redundant bits
@@ -275,28 +248,28 @@ private:
     header |= not_header_bits;
     header |= util::bit_mask_position_rt<uint64_t>::value(index);
 
-    set_header(header);
+    set_header(header, data);
   }
 
-  constexpr void insert_into_body(uint8_t position, uint8_t r)
+  static constexpr void insert_into_body(uint8_t position, uint8_t r, uint8_t* data)
   {
     // shortcut to not shift anything if not necessary
-    if (position == size())
+    if (position == size(data))
     {
-      data_[position + 7] = r;
+      data[position + 7] = r;
       return;
     }
 
     // 25 elements may be stored. (128 / 8) - 7 = 9 in the first lane and the remaining 16 in the second
     // shifting with avx-2 is only possible in one lane. Hence, we need to decide on which lane we are in
     // because then avx-2 is pretty much useless for our usecase we just use sse instructions doing the lane
-    // shifting ourself
+    // shifting ourselves
 
     // we are in the second lane
     if (position >= 9)
     {
       position -= 9;
-      __m128i second_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data_) + 1)};
+      __m128i second_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data) + 1)};
 
       auto up_to_insertion{_mm_and_si128(second_lane, util::reg_128_bit_mask_right_rt::value(position))};
 
@@ -305,8 +278,8 @@ private:
       second_lane = _mm_and_si128(second_lane, util::reg_128_bit_mask_left_rt::value(15 - position));
 
       second_lane = _mm_or_si128(second_lane, up_to_insertion);
-      _mm_store_si128((reinterpret_cast<__m128i*>(data_) + 1), second_lane);
-      data_[position + 9 + 7] = r;
+      _mm_store_si128((reinterpret_cast<__m128i*>(data) + 1), second_lane);
+      data[position + 9 + 7] = r;
       return;
     }
 
@@ -320,13 +293,13 @@ private:
 
     // we need to go here for size() == 9 as well, because the header is not updated on the size we will reach after insertion
     // yet, then it will be > 9 and we'll need to shift out
-    if (size() >= 9)
+    if (size(data) >= 9)
     {
       // last key of the first lane
-      shifted_out = data_[15];
+      shifted_out = data[15];
     }
 
-    __m128i first_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data_))};
+    __m128i first_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data))};
     auto up_to_insertion{_mm_and_si128(first_lane, util::reg_128_bit_mask_right_rt::value(position + 7))};
 
     first_lane = _mm_slli_si128(first_lane, 1);
@@ -335,16 +308,15 @@ private:
     first_lane = _mm_and_si128(first_lane, util::reg_128_bit_mask_left_rt::value(15 - (position + 7)));
 
     first_lane = _mm_or_si128(first_lane, up_to_insertion);
-    _mm_store_si128((reinterpret_cast<__m128i*>(data_)), first_lane);
-    data_[position + 7] = r;
+    _mm_store_si128((reinterpret_cast<__m128i*>(data)), first_lane);
+    data[position + 7] = r;
 
     if (shifted_out)
     {
-      insert_into_body(9, *shifted_out);
+      insert_into_body(9, *shifted_out, data);
     }
   }
 
-  uint8_t* data_;
 };
 
 } // namespace prefix::simd

@@ -7,29 +7,36 @@
 #include <gtest/gtest.h>
 #include "prefix/adapted/bin.hpp"
 
+using bin = prefix::adapted::bin;
 
 class adapted_bin_test : public testing::Test
 {
 public:
-  adapted_bin_test()
+
+  void SetUp() override
   {
-    this->bin_ = std::make_unique<prefix::adapted::bin>();
+    data_ = new uint8_t[32]();
+  }
+
+  void TearDown() override
+  {
+    delete[] data_;
   }
 
   [[nodiscard]] uint8_t find_maximum_linear() const
   {
     uint8_t current_max{0};
-    for (uint8_t i{0}; i < 31; ++i)
+    for (uint8_t i{1}; i < 32; ++i)
     {
-      if (bin_->operator[](i) > current_max)
+      if (data_[i] > current_max)
       {
-        current_max = bin_->operator[](i);
+        current_max = data_[i];
       }
     }
     return current_max;
   }
 
-  std::unique_ptr<prefix::interfaces::i_bin> bin_;
+  uint8_t* data_{nullptr};
 };
 
 TEST_F(adapted_bin_test, random_insert_lookup_size_10)
@@ -50,19 +57,19 @@ TEST_F(adapted_bin_test, random_insert_lookup_size_10)
   for (auto rand_val : rand_values)
   {
     rand_set.insert(rand_val);
-    bin_->insert(rand_val);
-    ASSERT_EQ(rand_set.size(), bin_->size());
+    bin::insert(rand_val, data_);
+    ASSERT_EQ(rand_set.size(), bin::size(data_));
   }
 
   for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)
   {
     if (rand_set.contains(fp))
     {
-      ASSERT_TRUE(bin_->query(fp));
+      ASSERT_TRUE(bin::query(fp, data_));
     }
     else
     {
-      ASSERT_FALSE(bin_->query(fp));
+      ASSERT_FALSE(bin::query(fp, data_));
     }
   }
 
@@ -86,19 +93,19 @@ TEST_F(adapted_bin_test, random_insert_lookup_size_31)
   for (auto rand_val : rand_values)
   {
     rand_set.insert(rand_val);
-    bin_->insert(rand_val);
-    ASSERT_EQ(rand_set.size(), bin_->size());
+    bin::insert(rand_val, data_);
+    ASSERT_EQ(rand_set.size(), bin::size(data_));
   }
 
   for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)
   {
     if (rand_set.contains(fp))
     {
-      ASSERT_TRUE(bin_->query(fp));
+      ASSERT_TRUE(bin::query(fp, data_));
     }
     else
     {
-      ASSERT_FALSE(bin_->query(fp));
+      ASSERT_FALSE(bin::query(fp, data_));
     }
   }
 }
@@ -107,18 +114,18 @@ TEST_F(adapted_bin_test, linear_insert_max_set_once)
 {
   for (uint8_t i{1}; i < 32; ++i)
   {
-    bin_->insert(i);
+    bin::insert(i, data_);
   }
-  bin_->insert(0);
+  bin::insert(0, data_);
 
   for (uint8_t i{0}; i < 31; ++i)
   {
-    ASSERT_TRUE(bin_->query(i));
+    ASSERT_TRUE(bin::query(i, data_));
   }
 
 
-  ASSERT_FALSE(bin_->query(31));
-  ASSERT_TRUE(bin_->query(30));
+  ASSERT_FALSE(bin::query(31, data_));
+  ASSERT_TRUE(bin::query(30, data_));
 }
 
 TEST_F(adapted_bin_test, insert_max_set_multiple_times)
@@ -126,36 +133,36 @@ TEST_F(adapted_bin_test, insert_max_set_multiple_times)
   for (uint8_t i{UINT8_MAX - 30}; i < UINT8_MAX; ++i)
   {
 
-    ASSERT_FALSE(bin_->insert(i));
+    ASSERT_FALSE(bin::insert(i, data_));
 
   }
-  ASSERT_FALSE(bin_->insert(UINT8_MAX));
+  ASSERT_FALSE(bin::insert(UINT8_MAX, data_));
 
   for (uint8_t i{UINT8_MAX - 30}; i < UINT8_MAX; ++i)
   {
-    ASSERT_TRUE(bin_->query(i));
+    ASSERT_TRUE(bin::query(i, data_));
   }
 
-  ASSERT_TRUE(bin_->query(UINT8_MAX));
+  ASSERT_TRUE(bin::query(UINT8_MAX, data_));
 
   for (uint8_t i{0}; i < UINT8_MAX - 30; ++i)
   {
     std::optional<uint8_t> return_val{};
     uint8_t max{find_maximum_linear()};
 
-    ASSERT_TRUE((return_val = bin_->insert(i)));
+    ASSERT_TRUE((return_val = bin::insert(i, data_)));
     ASSERT_GE(*return_val, max);
-    ASSERT_EQ(bin_->size(), 31);
+    ASSERT_EQ(bin::size(data_), 31);
     if (i <= max)
     {
-      ASSERT_TRUE(bin_->query(i));
+      ASSERT_TRUE(bin::query(i, data_));
     }
     else
     {
-      ASSERT_FALSE(bin_->query(i));
+      ASSERT_FALSE(bin::query(i, data_));
     }
 
-    ASSERT_FALSE(bin_->query(*return_val));
+    ASSERT_FALSE(bin::query(*return_val, data_));
   }
 }
 

@@ -9,7 +9,6 @@
 #include <immintrin.h>
 #include <iostream>
 #include <optional>
-#include "prefix/interfaces/i_bin.hpp"
 #include "util/masks.hpp"
 
 namespace prefix::adapted
@@ -21,31 +20,25 @@ namespace prefix::adapted
 /// The header stores the size in the 5 least significant bits of the first byte of data_. The first most significant bit
 /// marks whether the pd is overflowed
 /// This gives a header size of one byte. Hence, everything after that is a key. Giving the ability to store 31 bytes
-class bin : public interfaces::i_bin
+class bin
 {
 public:
-  bin();
 
-  ~bin() override;
+  static bool query(uint8_t r, uint8_t* data);
 
-  uint8_t& operator[](uint8_t index) const override;
+  static std::optional<uint8_t> insert(uint8_t r, uint8_t* data);
 
-  [[nodiscard]] bool query(uint8_t r) const override;
+  static uint8_t size(uint8_t* data);
 
-  std::optional<uint8_t> insert(uint8_t r) override;
+  static bool overflowed(uint8_t* data);
 
-  [[nodiscard]] uint8_t size() const override;
+  static void set_overflowed(uint8_t* data);
 
-  [[nodiscard]] bool overflowed() const override;
-
-  void set_overflowed() const;
-
-  [[nodiscard]] bool greater_than_max(uint8_t fp) override;
+  static bool greater_than_max(uint8_t fp, uint8_t* data);
 
 private:
-  void increase_size();
+  static void increase_size(uint8_t* data);
 
-  uint8_t* data_;
 };
 } // namespace prefix::adapted
 #endif // INCLUDE_PREFIX_ADAPTED_POCKET_DICTIONARY_HPP

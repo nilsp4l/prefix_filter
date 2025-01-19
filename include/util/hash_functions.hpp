@@ -67,20 +67,25 @@ struct most_significant_based_fp<25>
   }
 };
 
-template<typename key_t, uint32_t size>
+template<uint32_t size>
 struct bloom_hash_function
 {
-
-};
-template<>
-struct bloom_hash_function<uint16_t, 4096>
-{
-  constexpr inline static std::array<uint32_t, 3> hash(uint16_t key)
+  constexpr inline static std::array<std::size_t, 3> hash(std::pair<std::size_t, uint8_t> fp)
   {
-    return {
-      static_cast<uint32_t>(key) & (256 - 1), static_cast<uint32_t>(key) & (1024 - 1),
-      static_cast<uint32_t>(key >> 6) & (4096 - 1)
-    };
+    uint64_t new_fingerprint{((static_cast<uint64_t>(fp.first) << 16) >> 16) | static_cast<uint64_t>(fp.second)};
+    return {hash_1(new_fingerprint) & size, hash_2(new_fingerprint) % size,
+            (hash_1(new_fingerprint) ^ hash_2(new_fingerprint)) % size};
+  }
+
+private:
+  constexpr inline static std::size_t hash_1(uint64_t key)
+  {
+    return key / 11;
+  }
+
+  constexpr inline static std::size_t hash_2(uint64_t key)
+  {
+    return static_cast<std::size_t>(key);
   }
 };
 
@@ -101,6 +106,23 @@ struct prefix_fingerprint<uint64_t, size>
     to_return.second = key & UINT8_MAX;
 
     return to_return;
+  }
+};
+
+struct cuckoo_fingerprint
+{
+  constexpr inline static uint16_t fp(uint64_t key)
+  {
+    return key & (UINT16_MAX - 1);
+  }
+};
+
+template<std::size_t no_buckets>
+struct cuckoo_hash
+{
+  constexpr inline static uint64_t hash(uint64_t key)
+  {
+    return key % no_buckets;
   }
 };
 
