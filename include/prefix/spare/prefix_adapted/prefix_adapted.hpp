@@ -40,7 +40,7 @@ public:
     }
   }
 
-  filter& operator=(filter<key_t, size>&& other) noexcept
+  filter& operator=(filter<uint64_t, size>&& other) noexcept
   {
 
     data_ = other.data_;
@@ -48,23 +48,21 @@ public:
     return *this;
   }
 
-  void insert(key_t key)
+  void insert(std::pair<key_t, std::size_t> key)
   {
 
-    auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
 
-    if (bin::size(data_ + (fp.first << 5)) <= bin::maximum_size)
+    if (bin::size(data_ + ((key.first << 5) % size)) <= bin::maximum_size)
     {
-      bin::insert(fp.second, data_ + (fp.first << 5));
+      bin::insert(key.second, data_ + ((key.first << 5) % size));
     }
 
   }
 
-  bool query(key_t key)
+  bool query(std::pair<key_t, std::size_t> key)
   {
-    auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
 
-    return bin::query(fp.second, data_ + (fp.first << 5));
+    return bin::query(key.second, data_ + ((key.first << 5) % size));
 
   }
 

@@ -30,7 +30,7 @@ public:
     {
       data_ = other.data_;
       other.data_ = nullptr;
-      bloom_ = std::move(other.bloom_);
+      spare_ = std::move(other.bloom_);
     }
   }
 
@@ -44,7 +44,7 @@ public:
 
     data_ = other.data_;
     other.data_ = nullptr;
-    bloom_ = std::move(other.bloom_);
+    spare_ = std::move(other.bloom_);
     return *this;
   }
 
@@ -54,7 +54,7 @@ public:
     auto insert_return{bin_t::insert(fp.second, data_ + (fp.first << 5))};
     if (insert_return)
     {
-      bloom_.insert(fp);
+      spare_.insert(fp);
     }
   }
 
@@ -68,7 +68,7 @@ public:
 
     if (bin_t::greater_than_max(fp.second, data_ + (fp.first << 5)))
     {
-      return bloom_.query(fp);
+      return spare_.query(fp);
     }
 
     return bin_t::query(fp.second, data_ + (fp.first << 5));
@@ -79,7 +79,7 @@ private:
 
 
   uint8_t* data_{nullptr};
-  spare_t bloom_;
+  spare_t spare_;
 };
 }
 

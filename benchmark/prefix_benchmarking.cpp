@@ -21,7 +21,7 @@ static constexpr std::size_t elements_count{252'000'000};
 template<typename bin_t, std::size_t elements_to_store>
 using prefix_filter_with_bloom = decltype(prefix::prefix_filter_factory<uint64_t,
                                                                         bin_t,
-                                                                        prefix::spare::types::bloom,
+                                                                        prefix::spare::types::prefix_adapted,
                                                                         elements_to_store>::produce());
 
 template<typename bin_t, std::size_t elements_to_store>
@@ -174,7 +174,6 @@ BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
 
 }
 
-/*
 BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   random_insert_from_array,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
@@ -189,7 +188,7 @@ BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   }
 }
 
-
+/*
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
@@ -205,7 +204,7 @@ BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   }
 }
 
-
+*/
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random_adapted,
   prefix::adapted::bin,
@@ -261,5 +260,5 @@ BENCHMARK_DEFINE_F(set_random_insert_fixture, set_random_insert)(benchmark::Stat
     }
   }
 }
-*/
+
 BENCHMARK_MAIN();
