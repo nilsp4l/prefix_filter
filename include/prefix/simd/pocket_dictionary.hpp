@@ -19,6 +19,7 @@ class pocket_dictionary
 {
 public:
 
+  static constexpr uint8_t maximum_size{k};
 
   static constexpr bool query(uint8_t q, uint8_t r, uint8_t* data)
   {
@@ -27,8 +28,8 @@ public:
       return false;
     }
 
-    // loadu may be used, as we never cross cache lines
-    auto pd_reg{_mm256_loadu_si256(reinterpret_cast<__m256i*>(data))};
+    // load may be used, as we assume to be aligned
+    auto pd_reg{_mm256_load_si256(reinterpret_cast<__m256i*>(data))};
 
     // ignore the lowest byte
 

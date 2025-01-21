@@ -22,9 +22,10 @@ class bin
 public:
 
 
+  static constexpr std::size_t maximum_size{pocket_dictionary_t::maximum_size};
+
   static constexpr bool query(uint8_t fp, uint8_t* data)
   {
-    //std::cout << std::to_string(pocket_dictionary_t::max()) << std::endl;
     return pocket_dictionary_t::query(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
   }
 

@@ -8,13 +8,23 @@
 #include "prefix/non_simd/pocket_dictionary.hpp"
 #include "prefix/adapted/bin.hpp"
 #include "prefix/bin.hpp"
-#include "bloom/bloom_filter.hpp"
+#include "prefix/spare/bloom/bloom_filter.hpp"
 #include <random>
+#include "prefix/prefix_filter_factory.hpp"
+#include "prefix/spare/types.hpp"
+#include "prefix/spare/prefix_adapted/prefix_adapted.hpp"
 
 
-static constexpr std::size_t linear_bins_size{20106690};
+static constexpr std::size_t elements_count{252'000'000};
 
-template<typename bin_t, std::size_t no_bins>
+// workaround as auto does not work for non-static data members
+template<typename bin_t, std::size_t elements_to_store>
+using prefix_filter_with_bloom = decltype(prefix::prefix_filter_factory<uint64_t,
+                                                                        bin_t,
+                                                                        prefix::spare::types::bloom,
+                                                                        elements_to_store>::produce());
+
+template<typename bin_t, std::size_t elements_to_store>
 class prefix_insert_benchmark_fixture : public benchmark::Fixture
 {
 public:
@@ -26,11 +36,12 @@ public:
   {
   }
 
-  prefix::prefix_filter<uint64_t, bin_t, no_bins> filter_;
+  prefix_filter_with_bloom<bin_t, elements_to_store>
+    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
 
 };
 
-template<typename bin_t, std::size_t no_bins>
+template<typename bin_t, std::size_t elements_to_store>
 class prefix_random_insert_benchmark_fixture : public benchmark::Fixture
 {
 public:
@@ -46,13 +57,14 @@ public:
   {
   }
 
-  prefix::prefix_filter<uint64_t, bin_t, no_bins> filter_;
+  prefix_filter_with_bloom<bin_t, elements_to_store>
+    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
   std::mt19937 mers;
   std::uniform_int_distribution<uint64_t> distribution;
 
 };
 
-template<typename bin_t, std::size_t no_bins, std::size_t elements_size>
+template<typename bin_t, std::size_t elements_to_store>
 class prefix_query_benchmark_fixture : public benchmark::Fixture
 {
 public:
@@ -72,20 +84,19 @@ public:
     {
       filter_.insert(key);
     }
-    std::cout << "foo" << std::endl;
   }
 
   void TearDown(benchmark::State& state) override
   {
-    std::cout << "fooDown" << std::endl;
   }
 
-  prefix::prefix_filter<uint64_t, bin_t, no_bins> filter_;
-  std::array<uint64_t, elements_size> keys_{};
+  prefix_filter_with_bloom<bin_t, elements_to_store>
+    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
+  std::array<uint64_t, elements_to_store> keys_{};
 
 };
 
-template<typename bin_t, std::size_t no_bins>
+template<typename bin_t, std::size_t elements_to_store>
 class prefix_random_insert_from_array_benchmark_fixture : public benchmark::Fixture
 {
 public:
@@ -106,7 +117,8 @@ public:
   {
   }
 
-  prefix::prefix_filter<uint64_t, bin_t, no_bins> filter_;
+  prefix_filter_with_bloom<bin_t, elements_to_store>
+    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
   std::array<uint64_t, 252'000'000> values_;
 
 };
@@ -135,7 +147,7 @@ public:
 BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
   insert_linear,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
-  linear_bins_size)(benchmark::State& st)
+  elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
   {
@@ -150,7 +162,7 @@ BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
 BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
   insert_linear_adapted,
   prefix::adapted::bin,
-  linear_bins_size)(benchmark::State& st)
+  elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
   {
@@ -162,10 +174,11 @@ BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
 
 }
 
+/*
 BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   random_insert_from_array,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
-  linear_bins_size)(benchmark::State& st)
+  elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
   {
@@ -176,7 +189,7 @@ BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   }
 }
 
-/*
+
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
@@ -191,12 +204,11 @@ BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
     }
   }
 }
- */
+
 
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random_adapted,
   prefix::adapted::bin,
-  linear_bins_size,
   252'000'000)(benchmark::State& st)
 {
   for (auto _ : st)
@@ -212,7 +224,7 @@ BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
 BENCHMARK_TEMPLATE_F(prefix_random_insert_benchmark_fixture,
   insert_random,
   prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
-  linear_bins_size)(benchmark::State& st)
+  elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
   {
@@ -227,7 +239,7 @@ BENCHMARK_TEMPLATE_F(prefix_random_insert_benchmark_fixture,
 BENCHMARK_TEMPLATE_F(prefix_random_insert_benchmark_fixture,
   insert_random_adapted,
   prefix::adapted::bin,
-  linear_bins_size)(benchmark::State& st)
+  elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
   {
@@ -249,5 +261,5 @@ BENCHMARK_DEFINE_F(set_random_insert_fixture, set_random_insert)(benchmark::Stat
     }
   }
 }
-
+*/
 BENCHMARK_MAIN();

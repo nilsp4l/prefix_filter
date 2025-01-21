@@ -21,6 +21,8 @@ class pocket_dictionary
 {
 public:
 
+  static constexpr uint8_t maximum_size{k};
+
   static constexpr bool query(const uint8_t q, const uint8_t r, uint8_t* data)
   {
     auto index{get_list_index(q, data)};

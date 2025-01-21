@@ -3,7 +3,7 @@
 //
 
 #include <random>
-
+#include <cstdlib>
 #include <gtest/gtest.h>
 #include "prefix/adapted/bin.hpp"
 
@@ -15,12 +15,16 @@ public:
 
   void SetUp() override
   {
-    data_ = new uint8_t[32]();
+    data_ = reinterpret_cast<uint8_t*>(std::aligned_alloc(32, 32));
+    for (std::size_t i{0}; i < 32; ++i)
+    {
+      data_[i] = 0;
+    }
   }
 
   void TearDown() override
   {
-    delete[] data_;
+    std::free(data_);
   }
 
   [[nodiscard]] uint8_t find_maximum_linear() const

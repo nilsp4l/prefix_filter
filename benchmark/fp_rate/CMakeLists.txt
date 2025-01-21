@@ -1,3 +1,3 @@
 add_executable(fp_rate_benchmark fp_rate_benchmark.cpp)
 target_include_directories(fp_rate_benchmark PUBLIC ${PROJECT_SOURCE_DIR}/include)
-target_link_libraries(fp_rate_benchmark prefix_adapted)
+target_link_libraries(fp_rate_benchmark prefix_adapted spare_prefix_adapted)

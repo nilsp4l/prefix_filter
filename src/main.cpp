@@ -1,5 +1,5 @@
 #include "prefix/simd/pocket_dictionary.hpp"
-#include "bloom/bloom_filter.hpp"
+#include "prefix/spare/bloom/bloom_filter.hpp"
 #include <iostream>
 #include "prefix/prefix_filter.hpp"
 #include "prefix/adapted/bin.hpp"

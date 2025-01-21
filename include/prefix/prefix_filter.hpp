@@ -6,21 +6,26 @@
 #define PREFIX_PREFIX_FILTER_HPP
 
 #include "prefix/bin.hpp"
-#include "bloom/bloom_filter.hpp"
+#include "prefix/spare/bloom/bloom_filter.hpp"
+#include <cstdlib>
 
 namespace prefix
 {
-template<typename key_t, typename bin_t, std::size_t size>
+template<typename key_t, typename bin_t, typename spare_t, std::size_t size>
 class prefix_filter
 {
 public:
   prefix_filter()
   {
     // size * 32 (32 is the size of one pd)
-    data_ = new uint8_t[size << 5]();
+    data_ = reinterpret_cast<uint8_t*>(std::aligned_alloc(32, size << 5));
+    for (std::size_t i{0}; i < (size << 5); ++i)
+    {
+      data_[i] = 0;
+    }
   }
 
-  prefix_filter(prefix_filter<key_t, bin_t, size>&& other) noexcept
+  prefix_filter(prefix_filter<key_t, bin_t, spare_t, size>&& other) noexcept
   {
     {
       data_ = other.data_;
@@ -29,18 +34,18 @@ public:
     }
   }
 
-  prefix_filter& operator=(prefix_filter<key_t, bin_t, size>&& other) noexcept
+  ~prefix_filter()
+  {
+    std::free(data_);
+  }
+
+  prefix_filter& operator=(prefix_filter<key_t, bin_t, spare_t, size>&& other) noexcept
   {
 
     data_ = other.data_;
     other.data_ = nullptr;
     bloom_ = std::move(other.bloom_);
     return *this;
-  }
-
-  ~prefix_filter()
-  {
-    delete[] data_;
   }
 
   void insert(key_t key)
@@ -74,7 +79,7 @@ private:
 
 
   uint8_t* data_{nullptr};
-  bloom_filter<uint16_t, 10485706> bloom_;
+  spare_t bloom_;
 };
 }
 

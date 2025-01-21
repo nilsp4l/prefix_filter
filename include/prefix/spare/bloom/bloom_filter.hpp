@@ -2,13 +2,15 @@
 // Created by nils on 1/14/25.
 //
 
-#ifndef BLOOM_BLOOM_FILTER_HPP
-#define BLOOM_BLOOM_FILTER_HPP
+#ifndef PREFIX_SPARE_BLOOM_BLOOM_FILTER_HPP
+#define PREFIX_SPARE_BLOOM_BLOOM_FILTER_HPP
 
 #include <cinttypes>
 #include "util/hash_functions.hpp"
 #include <iostream>
 
+namespace prefix::spare
+{
 template<typename key_t, std::size_t size>
 class bloom_filter
 {
@@ -66,4 +68,5 @@ private:
   uint8_t* data_;
 
 };
-#endif //BLOOM_BLOOM_FILTER_HPP
+}// namespace prefix::spare
+#endif //PREFIX_SPARE_BLOOM_BLOOM_FILTER_HPP

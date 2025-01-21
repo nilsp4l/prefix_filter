@@ -4,14 +4,14 @@
 
 
 #include <gtest/gtest.h>
-#include <bloom/bloom_filter.hpp>
+#include <prefix/spare/bloom/bloom_filter.hpp>
 
 class bloom_test : public testing::Test
 {
 public:
   bloom_test() = default;
 
-  bloom_filter<uint16_t, 100000> filter_;
+  prefix::spare::bloom_filter<uint16_t, 100000> filter_;
 };
 
 

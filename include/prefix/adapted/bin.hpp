@@ -24,6 +24,8 @@ class bin
 {
 public:
 
+  static constexpr std::size_t maximum_size{31};
+
   static bool query(uint8_t r, uint8_t* data);
 
   static std::optional<uint8_t> insert(uint8_t r, uint8_t* data);

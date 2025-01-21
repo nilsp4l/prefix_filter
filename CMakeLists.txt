@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.25)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
 include(FetchContent)
 
 project(prefix_filter_dse)
@@ -11,6 +12,7 @@ add_subdirectory(src)
 add_subdirectory(include)
 
 set(BENCHMARK_ENABLE_TESTING OFF)
+
 
 FetchContent_Declare(
         googletest
