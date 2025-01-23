@@ -16,7 +16,7 @@
 
 namespace prefix
 {
-template<uint8_t k, typename pocket_dictionary_t>
+template<typename pocket_dictionary_t>
 class bin
 {
 public:
@@ -24,14 +24,19 @@ public:
 
   static constexpr std::size_t maximum_size{pocket_dictionary_t::maximum_size};
 
-  static constexpr bool query(uint8_t fp, uint8_t* data)
+  static constexpr bool query(uint16_t fp, uint8_t* data)
   {
-    return pocket_dictionary_t::query(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
+    return pocket_dictionary_t::query(util::most_significant_based_fp<maximum_size>::fingerprint(fp),
+      static_cast<uint8_t>(fp),
+      data);
   }
 
-  static constexpr std::optional<uint8_t> insert(uint8_t fp, uint8_t* data)
+  static constexpr std::optional<uint8_t> insert(uint16_t fp, uint8_t* data)
   {
-    if (pocket_dictionary_t::size(data) == k && !pocket_dictionary_t::overflowed(data))
+    auto q{util::most_significant_based_fp<maximum_size>::fingerprint(fp)};
+    auto r{static_cast<uint8_t>(fp)};
+
+    if (pocket_dictionary_t::size(data) == maximum_size && !pocket_dictionary_t::overflowed(data))
     {
       pocket_dictionary_t::mark_overflowed(data);
       pocket_dictionary_t::max_move_procedure(data);
@@ -39,19 +44,23 @@ public:
 
     if (!pocket_dictionary_t::overflowed(data))
     {
-      pocket_dictionary_t::insert(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
+      pocket_dictionary_t::insert(q,
+        r,
+        data);
       return std::nullopt;
     }
 
     uint8_t max{pocket_dictionary_t::max(data)};
 
-    if (fp > max)
+    if (greater_than_max(fp, data))
     {
-      return fp;
+      return static_cast<uint8_t>(fp);
     }
 
     pocket_dictionary_t::evict_max(data);
-    pocket_dictionary_t::insert(util::most_significant_based_fp<k>::fingerprint(fp), fp, data);
+    pocket_dictionary_t::insert(q,
+      r,
+      data);
     pocket_dictionary_t::max_move_procedure(data);
 
     return max;
@@ -67,9 +76,12 @@ public:
     return pocket_dictionary_t::overflowed(data);
   }
 
-  static constexpr bool greater_than_max(uint8_t fp, uint8_t* data)
+  static constexpr bool greater_than_max(uint16_t fp, uint8_t* data)
   {
-    return fp > pocket_dictionary_t::max(data);
+    uint8_t q{util::most_significant_based_fp<pocket_dictionary_t::maximum_size>::fingerprint(fp)};
+    uint8_t r{static_cast<uint8_t>(fp)};
+    return (r > pocket_dictionary_t::max(data) && q == pocket_dictionary_t::get_biggest_q(data))
+      || (q > pocket_dictionary_t::get_biggest_q(data));
   }
 
 };

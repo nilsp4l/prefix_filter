@@ -48,7 +48,7 @@ public:
     return *this;
   }
 
-  void insert(std::pair<key_t, std::size_t> key)
+  void insert(std::pair<std::size_t, key_t> key)
   {
 
 
@@ -56,11 +56,21 @@ public:
     {
       bin::insert(key.second, data_ + ((key.first << 5) % size));
     }
+    else
+    {
+      std::cout << "overflowed" << std::endl;
+    }
 
   }
 
-  bool query(std::pair<key_t, std::size_t> key)
+  bool query(std::pair<std::size_t, key_t> key)
   {
+    //std::cout << std::to_string(counter++) << std::endl;
+    // it is unlikely to ever happen, but if it does, we must return true to guarantee no false negatives
+    if (bin::size(data_ + ((key.first << 5) % size)) == bin::maximum_size)
+    {
+      return true;
+    }
 
     return bin::query(key.second, data_ + ((key.first << 5) % size));
 
@@ -68,6 +78,7 @@ public:
 
 private:
   uint8_t* data_{nullptr};
+  std::size_t counter{0};
 };
 }
 

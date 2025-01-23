@@ -27,6 +27,7 @@ add_executable(
 target_link_libraries(
         prefix_filter_test
         prefix_adapted
+        spare_prefix_adapted
         GTest::gtest_main
 )
 target_include_directories(prefix_filter_test PUBLIC ${PROJECT_SOURCE_DIR}/include)

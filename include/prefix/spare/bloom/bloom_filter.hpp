@@ -40,10 +40,9 @@ public:
 
   void insert(std::pair<std::size_t, uint8_t> key)
   {
-    for (uint32_t position : util::bloom_hash_function<size << 3>::hash(key))
+    for (uint64_t position : util::bloom_hash_function<(size << 3)>::hash(key))
     {
-      data_[position / 8] |= (util::bit_mask_position_rt<uint8_t>::value(
-        position & util::bit_mask_right<uint8_t, 3>::value)); // position % 8
+      data_[position / 8] |= (util::bit_mask_position_rt<uint8_t>::value(position % 8)); // position % 8
     }
 
   }
@@ -51,10 +50,10 @@ public:
   bool query(std::pair<std::size_t, uint8_t> key)
   {
 
-    for (uint32_t position : util::bloom_hash_function<size << 3>::hash(key))
+    for (uint64_t position : util::bloom_hash_function<(size << 3)>::hash(key))
     {
-      if (!(data_[position / 8] & (util::bit_mask_position_rt<uint8_t>::value(
-        position & util::bit_mask_right<uint8_t, 3>::value)))) // position % 8
+      uint8_t foo{data_[position / 8]};
+      if (!(data_[position / 8] & (util::bit_mask_position_rt<uint8_t>::value(position % 8)))) // position % 8
       {
         return false;
       }

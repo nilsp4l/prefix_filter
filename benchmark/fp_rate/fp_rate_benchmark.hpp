@@ -8,6 +8,7 @@
 #include <cinttypes>
 #include <random>
 #include <set>
+#include <iostream>
 
 template<typename filter_t>
 class fp_rate_benchmark
@@ -33,18 +34,35 @@ public:
       filter_.insert(current_random_element);
     }
 
-    for (std::size_t i{0}; i < maximum; ++i)
+    std::size_t spare_counter{0};
+
+    for (std::size_t i{0}; i < no_elements; ++i)
     {
-      if (compare_set.find(i) == compare_set.end() && filter_.query(i))
+      auto current_element{distribution(mers)};
+      bool spare{false};
+      bool ignore{false};
+      if (compare_set.find(current_element) == compare_set.end() && filter_.query(current_element, &spare))
       {
+        if (spare)
+        {
+          ++spare_counter;
+        }
         ++no_false_positive;
       }
-      else if (compare_set.find(i) == compare_set.end() && !filter_.query(i))
+      else if (compare_set.find(current_element) == compare_set.end() && !filter_.query(current_element, &ignore))
       {
         ++no_true_negative;
       }
 
+      if (compare_set.find(current_element) != compare_set.end() && !filter_.query(current_element, &spare))
+      {
+        std::cout << "FALSE NEGATIVE!" << std::endl;
+      }
+
     }
+
+    std::cout << std::to_string(no_false_positive) << std::endl;
+    std::cout << std::to_string(spare_counter) << std::endl;
 
     return static_cast<double>(no_false_positive) / static_cast<double>(no_false_positive + no_true_negative);
 

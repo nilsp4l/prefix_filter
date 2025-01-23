@@ -34,7 +34,9 @@ public:
     // ignore the lowest byte
 
     auto cmp_result{_mm256_cmpeq_epi8(pd_reg, _mm256_set1_epi8(static_cast<int8_t>(r)))};
-    auto matches{((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data)) << 7)) >> 7)};
+    uint32_t
+      matches{static_cast<uint32_t>((
+      (_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data)) << 7)) >> 7))};
 
     // cutdown of queries as described in the paper
     if (matches == 0)
@@ -48,7 +50,7 @@ public:
     // because it is not necessary, as the matches mask will turn 0 before we reach there
     auto header{get_header(data)};
     uint8_t current_list{0};
-    while (matches)
+    while (matches && header)
     {
       if (!(header & util::bit_mask_left<uint64_t, 0>::value))
       {
@@ -61,6 +63,7 @@ public:
       {
         return true;
       }
+
 
       matches >>= 1;
       header <<= 1;
@@ -210,7 +213,6 @@ public:
     return get_header(data) & util::bit_mask_position<uint64_t, 50>::value;
   }
 
-private:
   static constexpr uint8_t get_biggest_q(uint8_t* data)
   {
     uint64_t header_reg{get_header(data) & util::bit_mask_left<uint64_t, 55>::value};
@@ -218,6 +220,9 @@ private:
     header_reg &= ~util::bit_mask_left<uint64_t, 58>::value; // 0 everything except for the least significant 5 bits
     return static_cast<uint8_t>(header_reg);                 // ignore everything except for the first four bits
   }
+
+private:
+
 
   static constexpr void set_header(uint64_t new_header, uint8_t* data)
   {

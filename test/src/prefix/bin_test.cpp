@@ -12,8 +12,8 @@
 #include <iostream>
 #include <cstdlib>
 
-class bin_test : public testing::TestWithParam<std::variant<prefix::bin<25, prefix::non_simd::pocket_dictionary<25>>,
-                                                            prefix::bin<25, prefix::simd::pocket_dictionary<25>>>>
+class bin_test : public testing::TestWithParam<std::variant<prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
+                                                            prefix::bin<prefix::simd::pocket_dictionary<25>>>>
 {
 public:
 
@@ -36,8 +36,8 @@ public:
 };
 
 INSTANTIATE_TEST_SUITE_P(all_bin_tests, bin_test, testing::Values(
-  prefix::bin<25, prefix::non_simd::pocket_dictionary<25>>(),
-  prefix::bin<25, prefix::simd::pocket_dictionary<25>>()
+  prefix::bin<prefix::non_simd::pocket_dictionary<25>>(),
+  prefix::bin<prefix::simd::pocket_dictionary<25>>()
 ));
 
 TEST_P(bin_test, random_insert_lookup_size_10)
@@ -138,6 +138,11 @@ TEST_P(bin_test, linear_insert_max_set_once)
     for (uint8_t i{1}; i < 25; ++i)
     {
       ASSERT_TRUE(bin::query(i, data_));
+    }
+
+    for (uint8_t i{0}; i < 25; ++i)
+    {
+      std::cout << std::to_string(data_[i + 7]) << std::endl;
     }
 
 

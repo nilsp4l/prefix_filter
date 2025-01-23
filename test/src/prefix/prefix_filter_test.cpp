@@ -8,28 +8,48 @@
 #include "prefix/adapted/bin.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
 #include "prefix/bin.hpp"
+#include "prefix/prefix_filter_factory.hpp"
+
+template<typename bin_t, std::size_t elements_to_store>
+using prefix_filter_with_bloom = decltype(prefix::prefix_filter_factory<uint64_t,
+                                                                        bin_t,
+                                                                        prefix::spare::types::bloom,
+                                                                        elements_to_store>::produce());
+
+constexpr uint64_t to_insert{5000000};
 
 class prefix_filter_test : public testing::Test
 {
 public:
   prefix_filter_test() = default;
 
-  prefix::prefix_filter<uint64_t,
-                        prefix::adapted::bin,
-                        256 /*prefix::bin<25, prefix::simd::pocket_dictionary<25>>, 256*/> filter_{};
+  prefix_filter_with_bloom<prefix::bin<prefix::simd::pocket_dictionary<25>>, to_insert> filter_
+    {prefix::prefix_filter_factory<uint64_t,
+                                   prefix::bin<prefix::simd::pocket_dictionary<25>>,
+                                   prefix::spare::types::bloom,
+                                   to_insert>::produce()};
 };
 
 
 // we want to only have false positives not false negatives
 TEST_F(prefix_filter_test, insert_linear)
 {
-  for (uint64_t i{0}; i < 252'000'000; ++i)
+  bool foo{false};
+  for (uint64_t i{0}; i < to_insert; ++i)
   {
+    if (i == 33020)
+    {
+      int j = 0;
+    }
     filter_.insert(i);
   }
 
-  for (uint64_t i{0}; i < 252'000'000; ++i)
+  for (uint64_t i{0}; i < to_insert; ++i)
   {
-    ASSERT_TRUE(filter_.query(i));
+    if (!filter_.query(i, &foo))
+    {
+      filter_.query(i, &foo);
+    }
+    ASSERT_TRUE(filter_.query(i, &foo));
   }
 }

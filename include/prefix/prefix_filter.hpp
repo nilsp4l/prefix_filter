@@ -36,6 +36,18 @@ public:
 
   ~prefix_filter()
   {
+    std::size_t counter{0};
+    for (std::size_t i{0}; i < (size << 5); i += 32)
+    {
+      //std::cout << std::to_string(bin_t::size(data_ + i)) << std::endl;
+
+      if (bin_t::size(data_ + i) == 0)
+      {
+        ++counter;
+      }
+    }
+    std::cout << std::to_string(counter) << std::endl;
+
     std::free(data_);
   }
 
@@ -51,14 +63,22 @@ public:
   void insert(key_t key)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
+
+    if (fp.first == 172192)
+    {
+      int k = 0;
+    }
+
     auto insert_return{bin_t::insert(fp.second, data_ + (fp.first << 5))};
+
+
     if (insert_return)
     {
-      spare_.insert(fp);
+      spare_.insert({fp.first, *insert_return});
     }
   }
 
-  bool query(key_t key)
+  bool query(key_t key, bool* spare)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
     if (!bin_t::overflowed(data_ + (fp.first << 5)))
@@ -68,6 +88,7 @@ public:
 
     if (bin_t::greater_than_max(fp.second, data_ + (fp.first << 5)))
     {
+      *spare = true;
       return spare_.query(fp);
     }
 
@@ -77,7 +98,7 @@ public:
 
 private:
 
-
+  std::size_t counter{0};
   uint8_t* data_{nullptr};
   spare_t spare_;
 };

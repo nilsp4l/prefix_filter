@@ -37,7 +37,10 @@ public:
   }
 
   prefix_filter_with_bloom<bin_t, elements_to_store>
-    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
+    filter_{prefix::prefix_filter_factory<uint64_t,
+                                          bin_t,
+                                          prefix::spare::types::prefix_adapted,
+                                          elements_to_store>::produce()};
 
 };
 
@@ -58,7 +61,10 @@ public:
   }
 
   prefix_filter_with_bloom<bin_t, elements_to_store>
-    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
+    filter_{prefix::prefix_filter_factory<uint64_t,
+                                          bin_t,
+                                          prefix::spare::types::prefix_adapted,
+                                          elements_to_store>::produce()};
   std::mt19937 mers;
   std::uniform_int_distribution<uint64_t> distribution;
 
@@ -91,7 +97,10 @@ public:
   }
 
   prefix_filter_with_bloom<bin_t, elements_to_store>
-    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
+    filter_{prefix::prefix_filter_factory<uint64_t,
+                                          bin_t,
+                                          prefix::spare::types::prefix_adapted,
+                                          elements_to_store>::produce()};
   std::array<uint64_t, elements_to_store> keys_{};
 
 };
@@ -118,8 +127,11 @@ public:
   }
 
   prefix_filter_with_bloom<bin_t, elements_to_store>
-    filter_{prefix::prefix_filter_factory<uint64_t, bin_t, prefix::spare::types::bloom, elements_to_store>::produce()};
-  std::array<uint64_t, 252'000'000> values_;
+    filter_{prefix::prefix_filter_factory<uint64_t,
+                                          bin_t,
+                                          prefix::spare::types::prefix_adapted,
+                                          elements_to_store>::produce()};
+  std::array<uint64_t, 252'000'000> values_{};
 
 };
 
@@ -146,7 +158,7 @@ public:
 
 BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
   insert_linear,
-  prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
+  prefix::bin<prefix::simd::pocket_dictionary<25>>,
   elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
@@ -176,7 +188,7 @@ BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
 
 BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   random_insert_from_array,
-  prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
+  prefix::bin<prefix::simd::pocket_dictionary<25>>,
   elements_count)(benchmark::State& st)
 {
   for (auto _ : st)
@@ -222,7 +234,7 @@ BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
 
 BENCHMARK_TEMPLATE_F(prefix_random_insert_benchmark_fixture,
   insert_random,
-  prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
+  prefix::bin<prefix::simd::pocket_dictionary<25>>,
   elements_count)(benchmark::State& st)
 {
   for (auto _ : st)

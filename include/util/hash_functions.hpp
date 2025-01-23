@@ -8,6 +8,7 @@
 #include <functional>
 #include <cstdint>
 #include <tuple>
+#include <random>
 
 #include "masks.hpp"
 
@@ -19,7 +20,7 @@ namespace util
 template<uint8_t Q>
 struct most_significant_based_fp
 {
-  constexpr inline static uint8_t fingerprint(uint8_t)
+  constexpr inline static uint8_t fingerprint(uint16_t)
   {
     return 0;
   };
@@ -28,8 +29,9 @@ struct most_significant_based_fp
 template<>
 struct most_significant_based_fp<25>
 {
-  constexpr inline static uint8_t fingerprint(uint8_t r)
+  constexpr inline static uint8_t fingerprint(uint16_t r)
   {
+    r >>= 8;
     r = r & bit_mask_left<uint8_t, 5>::value;
     r >>= 3;
 
@@ -67,14 +69,39 @@ struct most_significant_based_fp<25>
   }
 };
 
-template<uint32_t size>
+struct carter_wegman_hash
+{
+  static inline __int128 a{(__int128)_mm_set_epi64x(0x3eb7c8fca7a155fb, 0xa46fc5be3ef5d14e)};
+  static inline __int128 b{(__int128)_mm_set_epi64x(0xa2a5c4739022a919, 0x9eecc1b094a0c649)};
+  static inline __int128 p{(__int128)_mm_set_epi64x(0x7ba1d7f87, 0x5d9f6a5582f3a125)};
+
+  inline static uint64_t fp(uint64_t key)
+  {
+
+    __int128 key_128{(__int128)_mm_set_epi64x(0x0, key)};
+
+
+    return (uint64_t)(((a * key_128 + b) % p) >> 64);
+  }
+};
+
+template<uint64_t size>
 struct bloom_hash_function
 {
   constexpr inline static std::array<std::size_t, 3> hash(std::pair<std::size_t, uint8_t> fp)
   {
-    uint64_t new_fingerprint{((static_cast<uint64_t>(fp.first) << 16) >> 16) | static_cast<uint64_t>(fp.second)};
-    return {hash_1(new_fingerprint) & size, hash_2(new_fingerprint) % size,
-            (hash_1(new_fingerprint) ^ hash_2(new_fingerprint)) % size};
+    uint64_t key{fp.first << 8 | static_cast<uint64_t>(fp.second)};
+    auto foo{size};
+    std::array<std::size_t, 3> to_return{};
+    auto current_acc{key};
+    for (auto& position : to_return)
+    {
+      current_acc = carter_wegman_hash::fp(current_acc);
+      position = current_acc % size;
+    }
+
+    return to_return;
+
   }
 
 private:
@@ -98,22 +125,16 @@ struct prefix_fingerprint
 template<std::size_t size>
 struct prefix_fingerprint<uint64_t, size>
 {
-  constexpr inline static std::pair<std::size_t, uint8_t> fp(uint64_t key)
-  {
-    std::pair<std::size_t, uint8_t> to_return;
 
-    to_return.first = key % size;
-    to_return.second = key & UINT8_MAX;
+  inline static std::pair<std::size_t, uint16_t> fp(uint64_t key)
+  {
+    std::pair<std::size_t, uint16_t> to_return;
+
+
+    to_return.first = carter_wegman_hash::fp(key) % size;
+    to_return.second = static_cast<uint16_t>(key & UINT16_MAX);
 
     return to_return;
-  }
-};
-
-struct cuckoo_fingerprint
-{
-  constexpr inline static uint16_t fp(uint64_t key)
-  {
-    return key & (UINT16_MAX - 1);
   }
 };
 
