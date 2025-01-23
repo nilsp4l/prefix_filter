@@ -5,7 +5,7 @@ include(FetchContent)
 
 project(prefix_filter_dse)
 
-add_compile_options(-Wall -Wextra -Wconversion -pedantic -Wfatal-errors -fsanitize=leak -march=native -msse4.2 -g -O0)
+add_compile_options(-Wall -Wextra -Wconversion -pedantic -Wfatal-errors -fsanitize=leak -march=native -msse4.2 -g -O3)
 
 
 add_subdirectory(src)

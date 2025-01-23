@@ -34,22 +34,17 @@ public:
 // we want to only have false positives not false negatives
 TEST_F(prefix_filter_test, insert_linear)
 {
-  bool foo{false};
   for (uint64_t i{0}; i < to_insert; ++i)
   {
-    if (i == 33020)
-    {
-      int j = 0;
-    }
     filter_.insert(i);
   }
 
   for (uint64_t i{0}; i < to_insert; ++i)
   {
-    if (!filter_.query(i, &foo))
+    if (!filter_.query(i))
     {
-      filter_.query(i, &foo);
+      filter_.query(i);
     }
-    ASSERT_TRUE(filter_.query(i, &foo));
+    ASSERT_TRUE(filter_.query(i));
   }
 }

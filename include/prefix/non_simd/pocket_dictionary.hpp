@@ -121,6 +121,14 @@ public:
     return get_header_reg(data) & (util::bit_mask_position<uint64_t, (k << 1)>::value);
   }
 
+  static constexpr uint8_t get_biggest_q(uint8_t* data)
+  {
+    uint64_t header_reg{get_header_reg(data)};
+    header_reg >>= 8; // move the position of q into the least significant 5 bits
+    header_reg &= ~util::bit_mask_left<uint64_t, 58>::value; // 0 everything except for the least significant 5 bits
+    return static_cast<uint8_t>(header_reg); // ignore everything except for the first four bits
+  }
+
 private:
 
 
@@ -157,14 +165,6 @@ private:
   {
     return (__builtin_bswap64((*reinterpret_cast<uint64_t*>(data))))
       & util::bit_mask_left<uint64_t, (k << 1) + (56 - (k << 1))>::value;
-  }
-
-  static constexpr uint8_t get_biggest_q(uint8_t* data)
-  {
-    uint64_t header_reg{get_header_reg(data)};
-    header_reg >>= 8; // move the position of q into the least significant 5 bits
-    header_reg &= ~util::bit_mask_left<uint64_t, 58>::value; // 0 everything except for the least significant 5 bits
-    return static_cast<uint8_t>(header_reg); // ignore everything except for the first four bits
   }
 
   static constexpr void set_biggest_q(uint8_t new_biggest_q, uint8_t* data)
