@@ -156,6 +156,20 @@ public:
 
 };
 
+BENCHMARK_TEMPLATE_DEFINE_F(prefix_query_benchmark_fixture,
+  query_random,
+  prefix::bin<prefix::simd::pocket_dictionary<25>>,
+  elements_count)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      filter_.query(key);
+    }
+  }
+}
+
 BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
   insert_linear,
   prefix::bin<prefix::simd::pocket_dictionary<25>>,
@@ -200,23 +214,6 @@ BENCHMARK_TEMPLATE_F(prefix_random_insert_from_array_benchmark_fixture,
   }
 }
 
-/*
-BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
-  query_random,
-  prefix::bin<25, prefix::simd::pocket_dictionary<25>>,
-  linear_bins_size,
-  252'000'000)(benchmark::State& st)
-{
-  for (auto _ : st)
-  {
-    for (auto key : keys_)
-    {
-      filter_.query(key);
-    }
-  }
-}
-
-*/
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random_adapted,
   prefix::adapted::bin,

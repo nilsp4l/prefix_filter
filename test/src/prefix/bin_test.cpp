@@ -139,13 +139,7 @@ TEST_P(bin_test, linear_insert_max_set_once)
     {
       ASSERT_TRUE(bin::query(i, data_));
     }
-
-    for (uint8_t i{0}; i < 25; ++i)
-    {
-      std::cout << std::to_string(data_[i + 7]) << std::endl;
-    }
-
-
+    
     ASSERT_FALSE(bin::query(25, data_));
     ASSERT_TRUE(bin::query(24, data_));
 

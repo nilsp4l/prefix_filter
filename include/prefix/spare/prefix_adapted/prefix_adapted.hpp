@@ -20,8 +20,8 @@ public:
   filter()
   {
     // size * 32 (32 is the size of one pd)
-    data_ = reinterpret_cast<uint8_t*>(std::aligned_alloc(16, size << 5));
-    for (std::size_t i{0}; i < (size << 5); ++i)
+    data_ = reinterpret_cast<uint16_t*>(std::aligned_alloc(32, size << 5));
+    for (std::size_t i{0}; i < (size << 4); ++i)
     {
       data_[i] = 0;
     }
@@ -50,34 +50,36 @@ public:
 
   void insert(std::pair<std::size_t, key_t> key)
   {
+    uint64_t new_key{(key.first << 8) | key.second};
+    auto fp{util::prefix_fingerprint<uint64_t, size>::fp(new_key)};
 
-
-    if (bin::size(data_ + ((key.first << 5) % size)) <= bin::maximum_size)
+    if (bin::size(data_ + ((fp.first << 4))) <= bin::maximum_size)
     {
-      bin::insert(key.second, data_ + ((key.first << 5) % size));
+      bin::insert(fp.second, data_ + ((fp.first << 4)));
     }
     else
     {
-      std::cout << "overflowed" << std::endl;
+      //std::cout << "overflowed" << std::endl;
     }
 
   }
 
   bool query(std::pair<std::size_t, key_t> key)
   {
-    //std::cout << std::to_string(counter++) << std::endl;
+    uint64_t new_key{key.first << 8 | key.second};
+    auto fp{util::prefix_fingerprint<uint64_t, size>::fp(new_key)};
     // it is unlikely to ever happen, but if it does, we must return true to guarantee no false negatives
-    if (bin::size(data_ + ((key.first << 5) % size)) == bin::maximum_size)
+    if (bin::size(data_ + ((fp.first << 4))) == bin::maximum_size)
     {
       return true;
     }
 
-    return bin::query(key.second, data_ + ((key.first << 5) % size));
+    return bin::query(fp.second, data_ + ((fp.first << 4)));
 
   }
 
 private:
-  uint8_t* data_{nullptr};
+  uint16_t* data_{nullptr};
   std::size_t counter{0};
 };
 }

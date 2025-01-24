@@ -122,6 +122,7 @@ public:
     uint8_t q_copy{biggest_q};
     uint8_t body_index{0};
     auto header{get_header(data)};
+
     while (q_copy)
     {
       if (!(header & util::bit_mask_position<uint64_t, 0>::value))
@@ -139,8 +140,10 @@ public:
     header = get_header(data);
     uint64_t last_bits{header & util::bit_mask_right<uint64_t, 14>::value};
     header &= util::bit_mask_left<uint64_t, 49>::value;
+    //                                                                        if the sum is 0 that would result in no change at all, which is never intended
     uint64_t up_to_deletion
-      {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(biggest_q + body_index - 1))};
+      {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(biggest_q + body_index > 0 ? biggest_q
+        + body_index - 1 : 0))};
     header <<= biggest_q + body_index + 1;
     header >>= biggest_q + body_index;
     header |= up_to_deletion;
@@ -169,16 +172,9 @@ public:
       header <<= 1;
     }
 
-    // set the biggest q in the redundant bits as proposed in the paper for whatever reason
-    uint64_t header_reg{get_header(data) & util::bit_mask_left<uint64_t, 55>::value};
-    uint64_t header_up_to_q{get_header(data) & util::bit_mask_right<uint64_t, 8>::value};
-    uint64_t biggest_q_position{~(util::bit_mask_left<uint64_t, 4>::value
-      >> 51)}; // keep everything except for the biggest_q_position to clear it
-    header_reg &= biggest_q_position;
-    uint64_t new_biggest_q_64{static_cast<uint64_t>(q)};
-    new_biggest_q_64 <<= 8;
-    header_reg |= new_biggest_q_64;
-    set_header(header_reg | header_up_to_q, data);
+    // set the biggest q in the redundant bits as proposed in the paper
+    data[6] &= util::bit_mask_left<uint8_t, 2>::value;
+    data[6] |= q;
 
     // at this point it is faster to search for the maximum in the last non-empty list linearely,
     // rather than doing simd
@@ -215,10 +211,7 @@ public:
 
   static constexpr uint8_t get_biggest_q(uint8_t* data)
   {
-    uint64_t header_reg{get_header(data) & util::bit_mask_left<uint64_t, 55>::value};
-    header_reg >>= 8;                                        // move the position of q into the least significant 5 bits
-    header_reg &= ~util::bit_mask_left<uint64_t, 58>::value; // 0 everything except for the least significant 5 bits
-    return static_cast<uint8_t>(header_reg);                 // ignore everything except for the first four bits
+    return (data[6] & util::bit_mask_right<uint8_t, 5>::value);
   }
 
 private:

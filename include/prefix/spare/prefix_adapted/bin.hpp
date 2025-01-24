@@ -14,17 +14,17 @@ struct bin
 {
 public:
 
-  static constexpr std::size_t maximum_size{31};
+  static constexpr std::size_t maximum_size{15};
 
-  static bool query(uint8_t r, uint8_t* data);
+  static bool query(uint16_t r, uint16_t* data);
 
-  static void insert(uint8_t r, uint8_t* data);
+  static void insert(uint16_t r, uint16_t* data);
 
-  static uint8_t size(uint8_t* data);
+  static uint8_t size(uint16_t* data);
 
 
 private:
-  static void increase_size(uint8_t* data);
+  static void increase_size(uint16_t* data);
 };
 }// namespace prefix::spare
 

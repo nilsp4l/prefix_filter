@@ -58,9 +58,7 @@ public:
     }
 
     pocket_dictionary_t::evict_max(data);
-    pocket_dictionary_t::insert(q,
-      r,
-      data);
+    pocket_dictionary_t::insert(q, r, data);
     pocket_dictionary_t::max_move_procedure(data);
 
     return max;

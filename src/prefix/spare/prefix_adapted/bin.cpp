@@ -9,7 +9,7 @@
 
 namespace prefix::spare::prefix_adapted
 {
-bool bin::query(uint8_t r, uint8_t* data)
+bool bin::query(uint16_t r, uint16_t* data)
 {
   if (!size(data))
   {
@@ -21,12 +21,12 @@ bool bin::query(uint8_t r, uint8_t* data)
 
 // ignore the lowest byte
 
-  auto cmp_result{_mm256_cmpeq_epi8(pd_reg, _mm256_set1_epi8(static_cast<int8_t>(r)))};
+  auto cmp_result{_mm256_cmpeq_epi16(pd_reg, _mm256_set1_epi16(static_cast<int16_t>(r)))};
 
-  return ((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data))) << 1) != 0);
+  return ((_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data) * 2)) << 2) != 0);
 }
 
-void bin::insert(uint8_t r, uint8_t* data)
+void bin::insert(uint16_t r, uint16_t* data)
 {
   if (query(r, data))
   {
@@ -39,12 +39,12 @@ void bin::insert(uint8_t r, uint8_t* data)
 
 }
 
-uint8_t bin::size(uint8_t* data)
+uint8_t bin::size(uint16_t* data)
 {
-  return (*data & util::bit_mask_right<uint8_t, 5>::value);
+  return static_cast<uint8_t>(*data);
 }
 
-void bin::increase_size(uint8_t* data)
+void bin::increase_size(uint16_t* data)
 {
   // we may ignore that the most significant bit is set, as we will never reach the point where incrementing will change that
   // as we are just manipulating the least significant 5 bits and not more here

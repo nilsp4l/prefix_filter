@@ -95,7 +95,9 @@ public:
     const auto list_indices{get_list_index(biggest_q, data)};
     auto header{get_header(data)};
     uint64_t up_to_deletion
-      {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(list_indices[0] + list_indices[1] - 1))};
+      {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(list_indices[0] + list_indices[1] - 1 > 0 ?
+                                                                             list_indices[0] + list_indices[1] - 1
+                                                                                                                       : 0))};
     header <<= list_indices[0] + list_indices[1] + 1;
     header >>= list_indices[0] + list_indices[1];
     header |= up_to_deletion;
@@ -112,13 +114,13 @@ public:
   static constexpr void mark_overflowed(uint8_t* data)
   {
     uint64_t header_reg{get_header_reg(data)};
-    header_reg |= util::bit_mask_position<uint64_t, (k << 1)>::value;
+    header_reg |= util::bit_mask_position<uint64_t, 50>::value;
     set_header_reg(header_reg, data);
   }
 
   static constexpr bool overflowed(uint8_t* data)
   {
-    return get_header_reg(data) & (util::bit_mask_position<uint64_t, (k << 1)>::value);
+    return get_header_reg(data) & util::bit_mask_position<uint64_t, 50>::value;;
   }
 
   static constexpr uint8_t get_biggest_q(uint8_t* data)
@@ -140,7 +142,7 @@ private:
   static constexpr void set_header(uint64_t new_header, uint8_t* data)
   {
     uint64_t header_cpy{__builtin_bswap64(*get_header_ptr(data))};
-    header_cpy &= ~util::bit_mask_left<uint64_t, k << 1>::value;
+    header_cpy &= ~util::bit_mask_left<uint64_t, 49>::value;
     new_header |= header_cpy;
     *get_header_ptr(data) = __builtin_bswap64(new_header);
   }

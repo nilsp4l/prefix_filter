@@ -11,7 +11,26 @@
 
 namespace prefix::spare
 {
-template<typename key_t, std::size_t size>
+
+// see https://stackoverflow.com/questions/658439/how-many-hash-functions-does-my-bloom-filter-need
+template<std::size_t elements_to_store>
+constexpr static std::array<std::size_t, 2> calculate_bloom_size()
+{
+  auto n{static_cast<double>(elements_to_store)};
+
+  // ln(0.001) as 0.1 % is the desired false positive rate
+  double ln_p{-6.90775527898};
+
+  // ln(2)
+  double ln_2{0.69314718056};
+
+  auto m{static_cast<std::size_t>(-n * ln_p / (ln_2 * ln_2))};
+  auto k{static_cast<size_t>(static_cast<double>(m) / n * ln_2)};
+  return {m, k};
+
+};
+
+template<typename key_t, std::size_t size, std::size_t no_hashes>
 class bloom_filter
 {
 public:
@@ -20,13 +39,13 @@ public:
     data_ = new uint8_t[size]();
   }
 
-  bloom_filter(bloom_filter<key_t, size>&& other)
+  bloom_filter(bloom_filter<key_t, size, no_hashes>&& other)
   {
     data_ = other.data_;
     other.data_ = nullptr;
   }
 
-  bloom_filter& operator=(bloom_filter<key_t, size>&& other) noexcept
+  bloom_filter& operator=(bloom_filter<key_t, size, no_hashes>&& other) noexcept
   {
     data_ = other.data_;
     other.data_ = nullptr;
@@ -40,7 +59,7 @@ public:
 
   void insert(std::pair<std::size_t, uint8_t> key)
   {
-    for (uint64_t position : util::bloom_hash_function<(size << 3)>::hash(key))
+    for (uint64_t position : util::bloom_hash_function<(size << 3), no_hashes>::hash(key))
     {
       data_[position / 8] |= (util::bit_mask_position_rt<uint8_t>::value(position % 8)); // position % 8
     }
@@ -50,7 +69,7 @@ public:
   bool query(std::pair<std::size_t, uint8_t> key)
   {
 
-    for (uint64_t position : util::bloom_hash_function<(size << 3)>::hash(key))
+    for (uint64_t position : util::bloom_hash_function<(size << 3), no_hashes>::hash(key))
     {
       if (!(data_[position / 8] & (util::bit_mask_position_rt<uint8_t>::value(position % 8)))) // position % 8
       {

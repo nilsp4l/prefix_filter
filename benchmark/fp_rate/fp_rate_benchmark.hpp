@@ -34,7 +34,6 @@ public:
       filter_.insert(current_random_element);
     }
 
-    std::size_t spare_counter{0};
 
     for (std::size_t i{0}; i < no_elements; ++i)
     {
@@ -55,9 +54,6 @@ public:
       }
 
     }
-
-    std::cout << std::to_string(no_false_positive) << std::endl;
-    std::cout << std::to_string(spare_counter) << std::endl;
 
     return static_cast<double>(no_false_positive) / static_cast<double>(no_false_positive + no_true_negative);
 

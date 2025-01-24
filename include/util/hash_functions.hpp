@@ -90,13 +90,13 @@ struct carter_wegman_hash
   }
 };
 
-template<uint64_t size>
+template<uint64_t size, uint64_t no_hashes>
 struct bloom_hash_function
 {
-  constexpr inline static std::array<std::size_t, 3> hash(std::pair<std::size_t, uint8_t> fp)
+  constexpr inline static std::array<std::size_t, no_hashes> hash(std::pair<std::size_t, uint8_t> fp)
   {
     uint64_t key{fp.first << 8 | static_cast<uint64_t>(fp.second)};
-    std::array<std::size_t, 3> to_return{};
+    std::array<std::size_t, no_hashes> to_return{};
     auto current_acc{key};
     for (auto& position : to_return)
     {
