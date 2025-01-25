@@ -31,6 +31,8 @@ private:
     {
       return 13.956315578352589;
     }
+
+    return 1.;
   }
 
   constexpr static std::size_t spare_size{static_cast<std::size_t>(1.1 * elements_to_store / sqrt_2_pi_k())};

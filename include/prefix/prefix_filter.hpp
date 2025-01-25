@@ -51,7 +51,10 @@ public:
   void insert(key_t key)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
-
+    if (fp.first == 102429)
+    {
+      int j = 0;
+    }
     auto insert_return{bin_t::insert(fp.second, data_ + (fp.first << 5))};
 
 

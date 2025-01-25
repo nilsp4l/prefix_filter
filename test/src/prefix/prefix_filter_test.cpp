@@ -23,9 +23,12 @@ class prefix_filter_test : public testing::Test
 public:
   prefix_filter_test() = default;
 
-  prefix_filter_with_bloom<prefix::bin<prefix::non_simd::pocket_dictionary<25>>, to_insert> filter_
+  prefix_filter_with_bloom<prefix::adapted::bin,
+    //prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
+                           to_insert> filter_
     {prefix::prefix_filter_factory<uint64_t,
-                                   prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
+                                   prefix::adapted::bin,
+      //prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
                                    prefix::spare::types::prefix_adapted,
                                    to_insert>::produce()};
 };
@@ -36,7 +39,7 @@ TEST_F(prefix_filter_test, insert_linear)
 {
   for (uint64_t i{0}; i < to_insert; ++i)
   {
-    if (i == 34510)
+    if (i == 41936)
     {
       int k = 0;
     }

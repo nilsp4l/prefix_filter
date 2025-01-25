@@ -11,7 +11,7 @@ class bloom_test : public testing::Test
 public:
   bloom_test() = default;
 
-  prefix::spare::bloom_filter<uint16_t, 100000> filter_;
+  prefix::spare::bloom_filter<uint16_t, 100000, 20> filter_;
 };
 
 
