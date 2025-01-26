@@ -22,6 +22,11 @@ public:
 
   static uint8_t size(uint16_t* data);
 
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return 32;
+  }
+
 
 private:
   static void increase_size(uint16_t* data);

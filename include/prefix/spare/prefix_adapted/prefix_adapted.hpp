@@ -34,10 +34,10 @@ public:
 
   filter(filter<key_t, size>&& other) noexcept
   {
-    {
-      data_ = other.data_;
-      other.data_ = nullptr;
-    }
+
+    data_ = other.data_;
+    other.data_ = nullptr;
+
   }
 
   filter& operator=(filter<uint64_t, size>&& other) noexcept
@@ -76,6 +76,16 @@ public:
 
     return bin::query(fp.second, data_ + ((fp.first << 4)));
 
+  }
+
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return size * bin::get_byte_size();
+  }
+
+  static inline std::string to_string()
+  {
+    return "Prefix-Adapted";
   }
 
 private:

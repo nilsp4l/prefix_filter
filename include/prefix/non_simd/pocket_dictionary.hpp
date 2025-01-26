@@ -131,6 +131,11 @@ public:
     return static_cast<uint8_t>(header_reg); // ignore everything except for the first four bits
   }
 
+  static inline std::string to_string()
+  {
+    return "Non-SIMD";
+  }
+
 private:
 
 

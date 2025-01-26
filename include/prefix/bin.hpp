@@ -82,6 +82,17 @@ public:
       || (q > pocket_dictionary_t::get_biggest_q(data));
   }
 
+  // for validation
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return 32;
+  }
+
+  static inline std::string to_string()
+  {
+    return pocket_dictionary_t::to_string();
+  }
+
 };
 } // namespace prefix
 

@@ -214,6 +214,11 @@ public:
     return (data[6] & util::bit_mask_right<uint8_t, 5>::value);
   }
 
+  static inline std::string to_string()
+  {
+    return "SIMD";
+  }
+
 private:
 
 

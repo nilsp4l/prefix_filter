@@ -80,6 +80,16 @@ public:
     return true;
   }
 
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return size;
+  }
+
+  static inline std::string to_string()
+  {
+    return "Bloom";
+  }
+
 private:
 
   uint8_t* data_;

@@ -141,4 +141,5 @@ void bin::increase_size(uint8_t* data)
   // as we are just manipulating the least significant 5 bits and not more here
   ++(*data_16);
 }
+
 }

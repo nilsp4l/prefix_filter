@@ -81,6 +81,22 @@ public:
 
   }
 
+  // for validation
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return size * bin_t::get_byte_size() + spare_t::get_byte_size();
+  }
+
+  static constexpr inline std::size_t get_spare_byte_size()
+  {
+    return spare_t::get_byte_size();
+  }
+
+  static inline std::string to_string()
+  {
+    return bin_t::to_string() + "-Prefix-Filter[" + spare_t::to_string() + "]";
+  }
+
 private:
 
   uint8_t* data_{nullptr};

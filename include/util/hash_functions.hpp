@@ -69,6 +69,7 @@ struct most_significant_based_fp<25>
     default:
       return r - 7;
     }
+
   }
 };
 
@@ -106,17 +107,6 @@ struct bloom_hash_function
 
     return to_return;
 
-  }
-
-private:
-  constexpr inline static std::size_t hash_1(uint64_t key)
-  {
-    return key / 11;
-  }
-
-  constexpr inline static std::size_t hash_2(uint64_t key)
-  {
-    return static_cast<std::size_t>(key);
   }
 };
 

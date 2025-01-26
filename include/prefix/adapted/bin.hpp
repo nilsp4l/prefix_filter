@@ -38,6 +38,16 @@ public:
 
   static bool greater_than_max(uint16_t fp, uint8_t* data);
 
+  static constexpr inline std::size_t get_byte_size()
+  {
+    return 32;
+  }
+
+  static inline std::string to_string()
+  {
+    return "Adapted";
+  }
+
 private:
   static void increase_size(uint8_t* data);
 };

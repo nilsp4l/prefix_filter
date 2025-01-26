@@ -50,4 +50,5 @@ void bin::increase_size(uint16_t* data)
   // as we are just manipulating the least significant 5 bits and not more here
   ++(*data);
 }
+
 }// namespace prefix::spare::prefix_adapted
