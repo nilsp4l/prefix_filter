@@ -38,5 +38,5 @@ build/*
 .vscode/*
 r_scripts/.Rproj.user/*
 r_scripts/r_scripts.Rproj
-
-.Rproj.user
+r_scripts/.RData
+r_scripts/.Rhistory

@@ -12,7 +12,7 @@ fp_bar_graph <- fp_rates_table |>
   ggplot(aes(x = name, y=size_in_mbytes)) +
   geom_col() +
   geom_col(aes(x = name, y = spare_size_in_mbytes), fill="brown1") +
-  geom_text(aes(label=paste(fp_rate_in_percent, "%")), position=position_stack(vjust=.8), color="white") +
-  labs(x = "Filter", y = "Size in MB") 
+  geom_text(aes(label=paste("FP:", fp_rate_in_percent, "%")), position=position_stack(vjust=.8), color="white") +
+  labs(x = "Filter", y = "Size(MB)") 
 
 fp_bar_graph

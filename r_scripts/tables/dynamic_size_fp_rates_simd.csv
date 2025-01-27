@@ -1,8 +1,10 @@
 name,fp_rate,size
-SIMD-Prefix-Filter[Bloom],0.005126,8314182
-SIMD-Prefix-Filter[Bloom],0.004204,8987846
-SIMD-Prefix-Filter[Bloom],0.003664,9661542
-SIMD-Prefix-Filter[Bloom],0.003272,10335206
-SIMD-Prefix-Filter[Bloom],0.002977,11008902
-SIMD-Prefix-Filter[Bloom],0.002783,11682598
-SIMD-Prefix-Filter[Bloom],0.002643,12356262
+SIMD-Prefix-Filter[Bloom],0.005103,8314182
+SIMD-Prefix-Filter[Bloom],0.004145,8987846
+SIMD-Prefix-Filter[Bloom],0.003612,9661542
+SIMD-Prefix-Filter[Bloom],0.003226,10335206
+SIMD-Prefix-Filter[Bloom],0.002993,11008902
+SIMD-Prefix-Filter[Bloom],0.002774,11682598
+SIMD-Prefix-Filter[Bloom],0.002612,12356262
+SIMD-Prefix-Filter[Bloom],0.002106,15051014
+SIMD-Prefix-Filter[Bloom],0.001664,18419430

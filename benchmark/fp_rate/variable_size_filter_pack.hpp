@@ -30,6 +30,7 @@ public:
   {
     constexpr auto sizes{prefix::spare::calculate_bloom_size<static_cast<std::size_t>(2 * factory_t::spare_size)>()};
 
+
     return std::make_tuple(fp_rate_benchmark_iteration<prefix::prefix_filter<uint64_t,
                                                                              bin_t,
                                                                              prefix::spare::bloom_filter<uint16_t,
@@ -73,7 +74,20 @@ public:
                                                         prefix::spare::bloom_filter<uint16_t,
                                                                                     (sizes[0] >> 3),
                                                                                     sizes[1]>,
-                                                        static_cast<std::size_t>(1.6 * no_bins())>>{});
+                                                        static_cast<std::size_t>(1.6 * no_bins())>>{},
+      fp_rate_benchmark_iteration<prefix::prefix_filter<uint64_t,
+                                                        bin_t,
+                                                        prefix::spare::bloom_filter<uint16_t,
+                                                                                    (sizes[0] >> 3),
+                                                                                    sizes[1]>,
+                                                        static_cast<std::size_t>(2. * no_bins())>>{},
+      fp_rate_benchmark_iteration<prefix::prefix_filter<uint64_t,
+                                                        bin_t,
+                                                        prefix::spare::bloom_filter<uint16_t,
+                                                                                    (sizes[0] >> 3),
+                                                                                    sizes[1]>,
+                                                        static_cast<std::size_t>(2.5 * no_bins())>>{});
+
   }
 };
 

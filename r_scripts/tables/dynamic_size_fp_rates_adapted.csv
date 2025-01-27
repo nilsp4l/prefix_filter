@@ -1,8 +1,10 @@
 name,fp_rate,size
-Adapted-Prefix-Filter[Bloom],0.004697,13264415
-Adapted-Prefix-Filter[Bloom],0.002801,14387199
-Adapted-Prefix-Filter[Bloom],0.001560,15510015
-Adapted-Prefix-Filter[Bloom],0.000978,16632831
-Adapted-Prefix-Filter[Bloom],0.000595,17755615
-Adapted-Prefix-Filter[Bloom],0.000403,18878431
-Adapted-Prefix-Filter[Bloom],0.000275,20001247
+Adapted-Prefix-Filter[Bloom],0.004729,13264415
+Adapted-Prefix-Filter[Bloom],0.002720,14387199
+Adapted-Prefix-Filter[Bloom],0.001647,15510015
+Adapted-Prefix-Filter[Bloom],0.000960,16632831
+Adapted-Prefix-Filter[Bloom],0.000615,17755615
+Adapted-Prefix-Filter[Bloom],0.000396,18878431
+Adapted-Prefix-Filter[Bloom],0.000279,20001247
+Adapted-Prefix-Filter[Bloom],0.000130,24492479
+Adapted-Prefix-Filter[Bloom],0.000092,30106495

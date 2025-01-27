@@ -15,6 +15,6 @@ all <- rbind(simd, adapted)
 
 graph <- ggplot(all, aes(x = size_in_mbytes, y = fp_rate_in_percent, group=name, color=name)) +
   geom_point() + geom_line() +
-  labs(y="FP-Rate in percent", x="Size in MB")
+  labs(y="FP-Rate (%)", x="Size (MB)", color="Filter")
 
 graph
