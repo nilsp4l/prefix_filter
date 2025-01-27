@@ -30,7 +30,7 @@ public:
     {
       data_ = other.data_;
       other.data_ = nullptr;
-      spare_ = std::move(other.bloom_);
+      spare_ = std::move(other.spare_);
     }
   }
 
@@ -44,7 +44,7 @@ public:
 
     data_ = other.data_;
     other.data_ = nullptr;
-    spare_ = std::move(other.bloom_);
+    spare_ = std::move(other.spare_);
     return *this;
   }
 

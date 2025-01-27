@@ -73,13 +73,12 @@ struct most_significant_based_fp<25>
   }
 };
 
-struct carter_wegman_hash
+struct two_wise
 {
   static inline int128
     a{(int128)_mm_set_epi64x(0x3eb7c8fca7a155fb, 0xa46fc5be3ef5d14e)};
   static inline int128
     b{(int128)_mm_set_epi64x(0xa2a5c4739022a919, 0x9eecc1b094a0c649)};
-  static inline int128 p{(int128)_mm_set_epi64x(0x7ba1d7f87, 0x5d9f6a5582f3a125)};
 
   inline static uint64_t fp(uint64_t key)
   {
@@ -87,7 +86,7 @@ struct carter_wegman_hash
     int128 key_128{(int128)_mm_set_epi64x(0x0, key)};
 
 
-    return (uint64_t)(((a * key_128 + b) % p) >> 64);
+    return (uint64_t)(((a * key_128 + b)) >> 64);
   }
 };
 
@@ -101,7 +100,7 @@ struct bloom_hash_function
     auto current_acc{key};
     for (auto& position : to_return)
     {
-      current_acc = carter_wegman_hash::fp(current_acc);
+      current_acc = two_wise::fp(current_acc);
       position = current_acc % size;
     }
 
@@ -125,7 +124,7 @@ struct prefix_fingerprint<uint64_t, size>
     std::pair<std::size_t, uint16_t> to_return;
 
 
-    to_return.first = carter_wegman_hash::fp(key) % size;
+    to_return.first = two_wise::fp(key) % size;
     to_return.second = static_cast<uint16_t>(key & UINT16_MAX);
 
     return to_return;

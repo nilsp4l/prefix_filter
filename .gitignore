@@ -39,3 +39,4 @@ build/*
 r_scripts/.Rproj.user/*
 r_scripts/r_scripts.Rproj
 
+.Rproj.user

@@ -8,6 +8,9 @@
 #include "prefix/spare/types.hpp"
 #include "prefix/spare/prefix_adapted/prefix_adapted.hpp"
 #include "prefix/bin_types.hpp"
+#include "prefix/bin.hpp"
+#include "prefix/spare/bloom/bloom_filter.hpp"
+#include "prefix/prefix_filter.hpp"
 
 namespace prefix
 {
@@ -59,14 +62,15 @@ private:
 
   }
 
+
+public:
+
   constexpr static std::size_t spare_size{static_cast<std::size_t>(1.1 * elements_to_store / sqrt_2_pi_k())};
 
   constexpr static std::size_t prefix_adapted_no_bins
     {static_cast<std::size_t>((1.3 * spare_size)
       / (0.95 * spare::prefix_adapted::bin::maximum_size))};
 
-
-public:
   constexpr static std::size_t
     no_bins{static_cast<std::size_t>((1. * elements_to_store) / (0.95 * bin_t::maximum_size))};
 
@@ -75,7 +79,8 @@ public:
     if constexpr (spare_type == spare::types::bloom)
     {
       constexpr auto sizes{prefix::spare::calculate_bloom_size<static_cast<std::size_t>(2 * spare_size)>()};
-      return prefix_filter<key_t, bin_t, prefix::spare::bloom_filter<uint16_t, (sizes[0] >> 3), sizes[1]>, no_bins>{};
+      return prefix_filter<key_t, bin_t, prefix::spare::bloom_filter<uint16_t, (sizes[0] >> 3), sizes[1]>, no_bins
+      >{};
     }
 
     if constexpr (spare_type == spare::types::prefix_adapted)
