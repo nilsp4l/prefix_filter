@@ -117,6 +117,42 @@ public:
 
 };
 
+template<prefix::bin_types bin_type, std::size_t elements_to_store>
+class prefix_query_all_negative_benchmark_fixture : public benchmark::Fixture
+{
+public:
+  void SetUp(benchmark::State& state) override
+  {
+    std::random_device random_device;
+
+    std::mt19937 mers{random_device()};
+    std::uniform_int_distribution<uint64_t> distribution(0, UINT64_MAX);
+
+    std::generate(keys_.begin(), keys_.end(), [&]()
+    {
+      return distribution(mers);
+    });
+
+
+    for (std::size_t i{0}; i < elements_to_store; ++i)
+    {
+      filter_.insert(distribution(mers));
+    }
+  }
+
+  void TearDown(benchmark::State& state) override
+  {
+  }
+
+  prefix_type<bin_type, elements_to_store>
+    filter_{prefix::prefix_filter_factory<uint64_t,
+                                          bin_type,
+                                          spare_impl,
+                                          elements_to_store>::produce()};
+  std::array<uint64_t, elements_to_store> keys_{};
+
+};
+
 class bloom_query_benchmark_fixture : public benchmark::Fixture
 {
 public:
@@ -135,6 +171,38 @@ public:
     for (uint64_t key : keys_)
     {
       filter_.insert(key);
+    }
+
+  }
+
+  void TearDown(benchmark::State& state) override
+  {
+  }
+
+  prefix::spare::bloom_filter<uint64_t, (bloom_sizes[0] >> 3), bloom_sizes[1]> filter_{};
+  std::array<uint64_t, elements_count> keys_{};
+
+};
+
+class bloom_query_all_negative_benchmark_fixture : public benchmark::Fixture
+{
+public:
+  void SetUp(benchmark::State& state) override
+  {
+    std::random_device random_device;
+
+    std::mt19937 mers{random_device()};
+    std::uniform_int_distribution<uint64_t> distribution(0, UINT64_MAX);
+
+    std::generate(keys_.begin(), keys_.end(), [&]()
+    {
+      return distribution(mers);
+    });
+
+
+    for (std::size_t i{0}; i < elements_count; ++i)
+    {
+      filter_.insert(distribution(mers));
     }
 
   }
@@ -205,18 +273,6 @@ public:
   std::array<uint64_t, 252'000'000> values_{};
 
 };
-
-BENCHMARK_F(bloom_query_benchmark_fixture,
-  query_random_bloom)(benchmark::State& st)
-{
-  for (auto _ : st)
-  {
-    for (auto key : keys_)
-    {
-      filter_.query(key);
-    }
-  }
-}
 
 BENCHMARK_TEMPLATE_F(prefix_insert_benchmark_fixture,
   insert_linear,
@@ -289,20 +345,6 @@ BENCHMARK_F(bloom_random_insert_from_array_benchmark_fixture,
 }
 
 BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
-  query_random_adapted,
-  prefix::bin_types::adapted,
-  252'000'000)(benchmark::State& st)
-{
-  for (auto _ : st)
-  {
-    for (auto key : keys_)
-    {
-      filter_.query(key);
-    }
-  }
-}
-
-BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   query_random,
   prefix::bin_types::simd,
   elements_count)(benchmark::State& st)
@@ -311,7 +353,73 @@ BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
   {
     for (auto key : keys_)
     {
-      filter_.query(key);
+      benchmark::DoNotOptimize(filter_.query(key));
+    }
+  }
+}
+
+BENCHMARK_TEMPLATE_F(prefix_query_benchmark_fixture,
+  query_random_adapted,
+  prefix::bin_types::adapted,
+  252'000'000)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      benchmark::DoNotOptimize(filter_.query(key));
+    }
+  }
+}
+
+BENCHMARK_F(bloom_query_benchmark_fixture,
+  query_random_bloom)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      benchmark::DoNotOptimize(filter_.query(key));
+    }
+  }
+}
+
+BENCHMARK_TEMPLATE_F(prefix_query_all_negative_benchmark_fixture,
+  query_random,
+  prefix::bin_types::simd,
+  elements_count)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      benchmark::DoNotOptimize(filter_.query(key));
+    }
+  }
+}
+
+BENCHMARK_TEMPLATE_F(prefix_query_all_negative_benchmark_fixture,
+  query_random_adapted,
+  prefix::bin_types::adapted,
+  252'000'000)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      benchmark::DoNotOptimize(filter_.query(key));
+    }
+  }
+}
+
+BENCHMARK_F(bloom_query_all_negative_benchmark_fixture,
+  query_random_bloom)(benchmark::State& st)
+{
+  for (auto _ : st)
+  {
+    for (auto key : keys_)
+    {
+      benchmark::DoNotOptimize(filter_.query(key));
     }
   }
 }
