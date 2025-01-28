@@ -1,5 +1,6 @@
 name,fp_rate,size_in_bytes,spare_size_in_bytes,inserted_elements
-SIMD-Prefix-Filter[Bloom],0.005097,8314182,1577350,5000000
-Adapted-Prefix-Filter[Bloom],0.004709,13264415,2036351,5000000
-SIMD-Prefix-Filter[Prefix-Adapted],0.005265,8017920,1281088,5000000
-Adapted-Prefix-Filter[Prefix-Adapted],0.007170,12881920,1653856,5000000
+SIMD-Prefix-Filter[Bloom],0.005113,419035402,79498570,252000000
+Adapted-Prefix-Filter[Bloom],0.004702,668526932,102632212,252000000
+SIMD-Prefix-Filter[Prefix-Adapted],0.005371,404104000,64567168,252000000
+Adapted-Prefix-Filter[Prefix-Adapted],0.007310,649250560,83355840,252000000
+Bloom,0.001021,452894008,0,252000000

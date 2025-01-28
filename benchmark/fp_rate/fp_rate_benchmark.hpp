@@ -46,7 +46,7 @@ public:
     for (std::size_t i{0}; i < no_elements; ++i)
     {
       auto current_random_element{distribution(mers)};
-      compare_set.insert(current_random_element);
+      //compare_set.insert(current_random_element);
       filter_.insert(current_random_element);
     }
 
@@ -54,7 +54,16 @@ public:
     for (std::size_t i{0}; i < no_elements; ++i)
     {
       auto current_element{distribution(mers)};
+      if (filter_.query(current_element))
+      {
+        ++no_false_positive;
+      }
+      else
+      {
+        ++no_true_negative;
+      }
 
+      /*
       if (compare_set.find(current_element) == compare_set.end() && filter_.query(current_element))
       {
         ++no_false_positive;
@@ -68,6 +77,7 @@ public:
       {
         std::cout << "FALSE NEGATIVE!" << std::endl;
       }
+       */
 
     }
 

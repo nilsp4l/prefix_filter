@@ -39,7 +39,7 @@ public:
     data_ = new uint8_t[size]();
   }
 
-  bloom_filter(bloom_filter<key_t, size, no_hashes>&& other)
+  bloom_filter(bloom_filter<key_t, size, no_hashes>&& other) noexcept
   {
     data_ = other.data_;
     other.data_ = nullptr;
@@ -57,7 +57,7 @@ public:
     delete[] data_;
   }
 
-  void insert(std::pair<std::size_t, uint8_t> key)
+  void insert(key_t key)
   {
     for (uint64_t position : util::bloom_hash_function<(size << 3), no_hashes>::hash(key))
     {
@@ -66,7 +66,7 @@ public:
 
   }
 
-  bool query(std::pair<std::size_t, uint8_t> key)
+  bool query(key_t key)
   {
 
     for (uint64_t position : util::bloom_hash_function<(size << 3), no_hashes>::hash(key))
@@ -88,6 +88,12 @@ public:
   static inline std::string to_string()
   {
     return "Bloom";
+  }
+
+  // may be ignored, just there to make fp rate benchmarking generic
+  static constexpr inline std::size_t get_spare_byte_size()
+  {
+    return 0;
   }
 
 private:

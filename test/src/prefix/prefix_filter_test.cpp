@@ -10,11 +10,6 @@
 #include "prefix/bin.hpp"
 #include "prefix/prefix_filter_factory.hpp"
 
-template<typename bin_t, std::size_t elements_to_store>
-using prefix_filter_with_bloom = decltype(prefix::prefix_filter_factory<uint64_t,
-                                                                        bin_t,
-                                                                        prefix::spare::types::prefix_adapted,
-                                                                        elements_to_store>::produce());
 
 constexpr uint64_t to_insert{5000000};
 
@@ -23,14 +18,8 @@ class prefix_filter_test : public testing::Test
 public:
   prefix_filter_test() = default;
 
-  prefix_filter_with_bloom<prefix::adapted::bin,
-    //prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
-                           to_insert> filter_
-    {prefix::prefix_filter_factory<uint64_t,
-                                   prefix::adapted::bin,
-      //prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
-                                   prefix::spare::types::prefix_adapted,
-                                   to_insert>::produce()};
+  prefix::prefix_filter_factory<uint64_t, prefix::bin_types::simd, prefix::spare::types::bloom, to_insert>::filter_t
+    filter_{};
 };
 
 

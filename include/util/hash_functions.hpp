@@ -107,6 +107,21 @@ struct bloom_hash_function
     return to_return;
 
   }
+
+  constexpr inline static std::array<std::size_t, no_hashes> hash(uint64_t fp)
+  {
+    uint64_t key{fp};
+    std::array<std::size_t, no_hashes> to_return{};
+    auto current_acc{key};
+    for (auto& position : to_return)
+    {
+      current_acc = two_wise::fp(current_acc);
+      position = current_acc % size;
+    }
+
+    return to_return;
+
+  }
 };
 
 template<typename key_t, std::size_t size>
