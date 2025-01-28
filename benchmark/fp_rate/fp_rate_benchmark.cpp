@@ -18,10 +18,9 @@ int main()
 {
   constexpr std::size_t elements_to_store{static_cast<std::size_t>(252'000'000)};
 
-  constexpr std::size_t bpk{12};
   constexpr std::size_t hashes{11};
 
-  std::string fp_rates{fp_rate_benchmark</*prefix::prefix_filter_factory<uint64_t,
+  std::string fp_rates{fp_rate_benchmark<prefix::prefix_filter_factory<uint64_t,
                                                                        prefix::bin_types::simd,
                                                                        prefix::spare::types::bloom,
                                                                        elements_to_store>::filter_t,
@@ -36,10 +35,10 @@ int main()
                                          prefix::prefix_filter_factory<uint64_t,
                                                                        prefix::bin_types::adapted,
                                                                        prefix::spare::types::prefix_adapted,
-                                                                       elements_to_store>::filter_t,*/
-    prefix::spare::bloom_filter<uint64_t,
-                                (2'836'425'457 >> 3),
-                                hashes>>::random_benchmark(
+                                                                       elements_to_store>::filter_t,
+                                         prefix::spare::bloom_filter<uint64_t,
+                                                                     (2'836'425'457 >> 3),
+                                                                     hashes>>::random_benchmark(
     elements_to_store)};
 
   std::fstream fp_rates_csv;
