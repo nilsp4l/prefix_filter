@@ -36,6 +36,11 @@ public:
     auto q{util::most_significant_based_fp<maximum_size>::fingerprint(fp)};
     auto r{static_cast<uint8_t>(fp)};
 
+    if (query(fp, data))
+    {
+      return std::nullopt;
+    }
+
     if (pocket_dictionary_t::size(data) == maximum_size && !pocket_dictionary_t::overflowed(data))
     {
       pocket_dictionary_t::mark_overflowed(data);

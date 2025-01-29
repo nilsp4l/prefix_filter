@@ -15,7 +15,7 @@
 namespace util
 {
 
-// to suppress -Wpedantic warning, as __int128 is not a iso c++ supported type
+// to suppress -Wpedantic warning, as __int128 is not an iso c++ supported type
 __extension__ typedef __int128 int128;
 
 // we are interested in having the biggest element stored in the last non-empty list,
@@ -34,42 +34,7 @@ struct most_significant_based_fp<25>
 {
   constexpr inline static uint8_t fingerprint(uint16_t r)
   {
-    r >>= 8;
-    r = r & bit_mask_left<uint8_t, 5>::value;
-    r >>= 3;
-
-    switch (r)
-    {
-    case 0 :
-      [[fallthrough]];
-    case 1:
-      return 0;
-    case 2:
-      [[fallthrough]];
-    case 3:
-      return 1;
-    case 4:
-      [[fallthrough]];
-    case 5:
-      return 2;
-    case 6:
-      [[fallthrough]];
-    case 7:
-      return 3;
-    case 8:
-      [[fallthrough]];
-    case 9:
-      return 4;
-    case 10:
-      [[fallthrough]];
-    case 11:
-      return 5;
-    case 12:
-      return 6;
-    default:
-      return r - 7;
-    }
-
+    return static_cast<uint8_t>(((static_cast<uint32_t>(r) * 0x1234567 + 0x133742) >> 16) % 25);
   }
 };
 

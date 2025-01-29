@@ -98,10 +98,6 @@ public:
     // find the end of the list
     while (header & util::bit_mask_position<uint64_t, 0>::value)
     {
-      if (data[body_position + 7] == r)
-      {
-        return;
-      }
       ++body_position;
       ++header_position;
       header <<= 1;

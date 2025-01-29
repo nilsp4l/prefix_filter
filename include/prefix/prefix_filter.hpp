@@ -51,7 +51,7 @@ public:
   void insert(key_t key)
   {
     auto fp{util::prefix_fingerprint<key_t, size>::fp(key)};
-    if (fp.first == 102429)
+    if (fp.first == 3599)
     {
       int j = 0;
     }
