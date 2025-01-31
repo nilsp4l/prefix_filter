@@ -44,6 +44,16 @@ uint8_t bin::size(uint16_t* data)
   return static_cast<uint8_t>(*data);
 }
 
+bool bin::overflowed(uint16_t* data)
+{
+  return *data & util::bit_mask_left<uint16_t, 0>::value;
+}
+
+void bin::set_overflowed(uint16_t* data)
+{
+  *data |= util::bit_mask_left<uint16_t, 0>::value;
+}
+
 void bin::increase_size(uint16_t* data)
 {
   // we may ignore that the most significant bit is set, as we will never reach the point where incrementing will change that

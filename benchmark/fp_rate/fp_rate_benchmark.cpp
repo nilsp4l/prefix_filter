@@ -36,9 +36,9 @@ int main()
                                                                        prefix::bin_types::adapted,
                                                                        prefix::spare::types::prefix_adapted,
                                                                        elements_to_store>::filter_t,
-                                         prefix::spare::bloom_filter<uint64_t,
-                                                                     (2'836'425'457 >> 3),
-                                                                     hashes>>::random_benchmark(
+                                         prefix::spare::bloom::bloom_filter<uint64_t,
+                                                                            (2'836'425'457 >> 3),
+                                                                            hashes>>::random_benchmark(
     elements_to_store)};
 
   std::fstream fp_rates_csv;

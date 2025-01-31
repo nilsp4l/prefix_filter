@@ -50,10 +50,9 @@ public:
     auto list_size{get_list_size(list_index[0] + list_index[1], data)};
 
     // element is inserted because it wasn't already there
-    if (insert_into_body(list_index[1], r, list_size, data))
-    {
-      insert_into_header(static_cast<uint8_t>(list_index[0] + list_index[1] + list_size), data);
-    }
+    insert_into_body(list_index[1], r, list_size, data);
+
+    insert_into_header(static_cast<uint8_t>(list_index[0] + list_index[1] + list_size), data);
 
   }
 
@@ -204,22 +203,15 @@ private:
     return pos;
   }
 
-  static constexpr bool insert_into_body(uint8_t index, uint8_t r, uint8_t list_size, uint8_t* data)
+  static constexpr void insert_into_body(uint8_t index, uint8_t r, uint8_t list_size, uint8_t* data)
   {
-    for (uint8_t i{0}; i < list_size; ++i)
-    {
-      if (data[7 + index + i] == r)
-      {
-        return false;
-      }
-    }
+
 
     for (uint8_t i{static_cast<uint8_t>(size(data))}; i > index + list_size; --i)
     {
       data[7 + i] = data[7 + i - 1];
     }
     data[7 + index + list_size] = r;
-    return true;
 
   }
 

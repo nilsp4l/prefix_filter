@@ -9,26 +9,9 @@
 #include "util/hash_functions.hpp"
 #include <iostream>
 
-namespace prefix::spare
+namespace prefix::spare::bloom
 {
 
-// see https://stackoverflow.com/questions/658439/how-many-hash-functions-does-my-bloom-filter-need
-template<std::size_t elements_to_store>
-constexpr static std::array<std::size_t, 2> calculate_bloom_size()
-{
-  auto n{static_cast<double>(elements_to_store)};
-
-  // ln(0.001) as 0.1 % is the desired false positive rate
-  double ln_p{-6.90775527898};
-
-  // ln(2)
-  double ln_2{0.69314718056};
-
-  auto m{static_cast<std::size_t>(-n * ln_p / (ln_2 * ln_2))};
-  auto k{static_cast<size_t>(static_cast<double>(m) / n * ln_2)};
-  return {m, k};
-
-};
 
 template<typename key_t, std::size_t size, std::size_t no_hashes>
 class bloom_filter

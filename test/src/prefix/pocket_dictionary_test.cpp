@@ -93,30 +93,6 @@ TEST_P(pocket_dictionary_test, insert_all_in_1_list)
 
 }
 
-TEST_P(pocket_dictionary_test, double_insert)
-{
-
-  std::visit([&](auto pd_a)
-  {
-    using pd = decltype(pd_a);
-    std::vector<uint8_t> compare_vector;
-    for (uint8_t i{0}; i < 25; ++i)
-    {
-      pd::insert(i, i, data_);
-      pd::insert(i, i, data_);
-
-      ASSERT_EQ(pd::size(data_), i + 1);
-      compare_vector.push_back(i);
-    }
-    for (uint8_t i{0}; i < 25; ++i)
-    {
-      ASSERT_TRUE(pd::query(i, i, data_));
-      ASSERT_EQ(data_[7 + i], compare_vector[i]);
-    }
-  }, GetParam());
-
-}
-
 TEST_P(pocket_dictionary_test, lists_of_size_2)
 {
 
@@ -179,10 +155,9 @@ TEST_P(pocket_dictionary_test, random_insert_lists_of_5_linear)
       for (uint8_t i{0}; i < 5; ++i)
       {
         pd::insert(list_index, rand_values[index], data_);
-        if (std::find(list.begin(), list.end(), rand_values[index]) == list.end())
-        {
-          list.push_back(rand_values[index]);
-        }
+
+        list.push_back(rand_values[index]);
+
 
         ++index;
       }
@@ -281,11 +256,8 @@ TEST_P(pocket_dictionary_test, random_insert_lists_of_5_shuffle)
       for (uint8_t i{0}; i < 5; ++i)
       {
         pd::insert(index, rand_values[current_index], data_);
-        if (std::find(compare_array[index].begin(), compare_array[index].end(), rand_values[current_index])
-          == compare_array[index].end())
-        {
-          compare_array[index].push_back(rand_values[current_index]);
-        }
+
+        compare_array[index].push_back(rand_values[current_index]);
 
         ++current_index;
       }

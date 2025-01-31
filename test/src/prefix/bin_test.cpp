@@ -133,15 +133,20 @@ TEST_P(bin_test, linear_insert_max_set_once)
       bin::insert(i, data_);
     }
 
-    bin::insert(0, data_);
-
-    for (uint8_t i{1}; i < 25; ++i)
+    auto max = bin::insert(0, data_);
+    ASSERT_TRUE(max);
+    for (uint8_t i{0}; i < 26; ++i)
     {
-      ASSERT_TRUE(bin::query(i, data_));
+      if (i == max)
+      {
+        ASSERT_FALSE(bin::query(i, data_));
+      }
+      else
+      {
+        ASSERT_TRUE(bin::query(i, data_));
+      }
+
     }
-    
-    ASSERT_FALSE(bin::query(25, data_));
-    ASSERT_TRUE(bin::query(24, data_));
 
   }, GetParam());
 }
@@ -152,26 +157,51 @@ TEST_P(bin_test, insert_10_max_switches)
   std::visit([&](auto bin_a)
   {
     using bin = decltype(bin_a);
-    for (uint8_t i{1}; i < 26; ++i)
+    for (uint16_t i{1}; i < 26; ++i)
     {
       bin::insert(i * 10, data_);
     }
 
-
-    uint8_t current_max{250};
-    ASSERT_EQ(data_[7 + 24], current_max);
-
-    for (uint8_t i{0}; i < 10; ++i)
+    for (uint16_t i{0}; i < 10; ++i)
     {
-      bin::insert(i, data_);
-
-      current_max -= 10;
-      ASSERT_EQ(data_[7 + 24], current_max);
+      auto max = bin::insert(i, data_);
+      ASSERT_TRUE(max);
+      ASSERT_FALSE(bin::query(*max, data_));
     }
 
-    for (uint8_t i{0}; i < 10; ++i)
+  }, GetParam());
+}
+
+TEST_P(bin_test, insert_random_field_test)
+{
+
+  std::visit([&](auto bin_a)
+  {
+    using bin = decltype(bin_a);
+    std::random_device random_device;
+
+    std::mt19937 mers{random_device()};
+    std::uniform_int_distribution<uint16_t> distribution(0, UINT16_MAX);
+
+    for (std::size_t i{0}; i < 100'000; ++i)
     {
-      ASSERT_TRUE(bin::query(i, data_));
+      auto current_element{distribution(mers)};
+      if (bin::query(current_element, data_))
+      {
+        continue;
+      }
+      if (bin::overflowed(data_) || bin::size(data_) == 25)
+      {
+        auto evicted{bin::insert(current_element, data_)};
+        ASSERT_TRUE(evicted);
+        ASSERT_EQ(bin::size(data_), 25);
+      }
+      else
+      {
+        ASSERT_FALSE(bin::query(current_element, data_));
+        ASSERT_FALSE(bin::insert(current_element, data_));
+        ASSERT_TRUE(bin::query(current_element, data_));
+      }
     }
 
   }, GetParam());

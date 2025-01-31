@@ -22,6 +22,10 @@ public:
 
   static uint8_t size(uint16_t* data);
 
+  static bool overflowed(uint16_t* data);
+
+  static void set_overflowed(uint16_t* data);
+
   static constexpr inline std::size_t get_byte_size()
   {
     return 32;

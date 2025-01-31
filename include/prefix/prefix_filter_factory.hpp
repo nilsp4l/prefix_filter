@@ -9,39 +9,16 @@
 #include "prefix/spare/prefix_adapted/prefix_adapted.hpp"
 #include "prefix/bin_types.hpp"
 #include "prefix/bin.hpp"
-#include "prefix/spare/bloom/bloom_filter.hpp"
+#include "prefix/spare/bloom/bloom_filter_factory.hpp"
 #include "prefix/prefix_filter.hpp"
+#include "prefix/bin_t_choice.hpp"
+
 
 namespace prefix
 {
-
-template<bin_types bin_type>
-struct bin_t_choice
-{
-};
-
-template<>
-struct bin_t_choice<bin_types::non_simd>
-{
-  using type = bin<non_simd::pocket_dictionary<25>>;
-};
-
-template<>
-struct bin_t_choice<bin_types::simd>
-{
-  using type = bin<simd::pocket_dictionary<25>>;
-};
-
-template<>
-struct bin_t_choice<bin_types::adapted>
-{
-  using type = adapted::bin;
-};
-
 template<typename key_t, bin_types bin_type, spare::types spare_type, std::size_t elements_to_store>
 struct prefix_filter_factory
 {
-
 
   // need the private part above, as the constexpr values are not found otherwise
 private:
@@ -62,7 +39,6 @@ private:
 
   }
 
-
 public:
 
   constexpr static std::size_t spare_size{static_cast<std::size_t>(1.1 * elements_to_store / sqrt_2_pi_k())};
@@ -78,10 +54,10 @@ public:
   {
     if constexpr (spare_type == spare::types::bloom)
     {
-      constexpr auto sizes{prefix::spare::calculate_bloom_size<static_cast<std::size_t>(2 * spare_size)>()};
       return prefix_filter<key_t,
                            bin_t,
-                           prefix::spare::bloom_filter<std::pair<std::size_t, uint8_t>, (sizes[0] >> 3), sizes[1]>,
+                           typename spare::bloom::bloom_filter_factory<std::pair<std::size_t, uint8_t>,
+                                                                       spare_size>::filter_t,
                            no_bins
       >{};
     }

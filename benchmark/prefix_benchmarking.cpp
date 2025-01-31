@@ -40,11 +40,11 @@ template<prefix::bin_types bin_type, std::size_t elements_to_store>
 class prefix_insert_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
@@ -60,7 +60,7 @@ template<prefix::bin_types bin_type, std::size_t elements_to_store>
 class prefix_random_insert_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -68,7 +68,7 @@ public:
     distribution = std::uniform_int_distribution<uint64_t>(0, UINT64_MAX);
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
@@ -86,7 +86,7 @@ template<prefix::bin_types bin_type, std::size_t elements_to_store>
 class prefix_query_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -104,7 +104,7 @@ public:
     }
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
@@ -121,7 +121,7 @@ template<prefix::bin_types bin_type, std::size_t elements_to_store>
 class prefix_query_all_negative_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -140,7 +140,7 @@ public:
     }
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
@@ -156,7 +156,7 @@ public:
 class bloom_query_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -175,11 +175,11 @@ public:
 
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
-  prefix::spare::bloom_filter<uint64_t, (bloom_sizes[0] >> 3), bloom_sizes[1]> filter_{};
+  prefix::spare::bloom::bloom_filter<uint64_t, (bloom_sizes[0] >> 3), bloom_sizes[1]> filter_{};
   std::array<uint64_t, elements_count> keys_{};
 
 };
@@ -187,7 +187,7 @@ public:
 class bloom_query_all_negative_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -207,11 +207,11 @@ public:
 
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
-  prefix::spare::bloom_filter<uint64_t, (bloom_sizes[0] >> 3), bloom_sizes[1]> filter_{};
+  prefix::spare::bloom::bloom_filter<uint64_t, (bloom_sizes[0] >> 3), bloom_sizes[1]> filter_{};
   std::array<uint64_t, elements_count> keys_{};
 
 };
@@ -220,7 +220,7 @@ template<prefix::bin_types bin_type, std::size_t elements_to_store>
 class prefix_random_insert_from_array_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -233,7 +233,7 @@ public:
     });
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 
@@ -249,10 +249,10 @@ public:
 class bloom_random_insert_from_array_benchmark_fixture : public benchmark::Fixture
 {
 public:
-  using filter_t = prefix::spare::bloom_filter<uint64_t, (bloom_sizes[0]
+  using filter_t = prefix::spare::bloom::bloom_filter<uint64_t, (bloom_sizes[0]
     >> 3), bloom_sizes[1]>;
 
-  void SetUp(benchmark::State& state) override
+  void SetUp(benchmark::State&) override
   {
     std::random_device random_device;
 
@@ -265,7 +265,7 @@ public:
     });
   }
 
-  void TearDown(benchmark::State& state) override
+  void TearDown(benchmark::State&) override
   {
   }
 

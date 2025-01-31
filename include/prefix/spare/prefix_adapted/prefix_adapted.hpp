@@ -50,26 +50,36 @@ public:
 
   void insert(std::pair<std::size_t, key_t> key)
   {
+
+
     uint64_t new_key{(key.first << 8) | key.second};
     auto fp{util::prefix_fingerprint<uint64_t, size>::fp(new_key)};
 
-    if (bin::size(data_ + ((fp.first << 4))) <= bin::maximum_size)
+    if (bin::overflowed(data_ + ((fp.first << 4))))
+    {
+      return;
+    }
+
+    // insert into already full filter overflows the filter
+    if (bin::size(data_ + ((fp.first << 4))) == bin::maximum_size)
+    {
+      bin::set_overflowed(data_ + ((fp.first << 4)));
+      return;
+    }
+
+    if (bin::size(data_ + ((fp.first << 4))) < bin::maximum_size)
     {
       bin::insert(fp.second, data_ + ((fp.first << 4)));
-    }
-    else
-    {
-      //std::cout << "overflowed" << std::endl;
     }
 
   }
 
   bool query(std::pair<std::size_t, key_t> key)
   {
-    uint64_t new_key{key.first << 8 | key.second};
+    uint64_t new_key{(key.first << 8) | key.second};
     auto fp{util::prefix_fingerprint<uint64_t, size>::fp(new_key)};
     // it is unlikely to ever happen, but if it does, we must return true to guarantee no false negatives
-    if (bin::size(data_ + ((fp.first << 4))) == bin::maximum_size)
+    if (bin::overflowed(data_ + ((fp.first << 4))))
     {
       return true;
     }
