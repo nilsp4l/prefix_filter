@@ -5,16 +5,18 @@
 #include <gtest/gtest.h>
 #include <array>
 #include <variant>
-#include "prefix/prefix_filter.hpp"
-#include "prefix/simd/pocket_dictionary.hpp"
 #include "prefix/adapted/bin.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
 #include "prefix/bin.hpp"
 #include "prefix/prefix_filter_factory.hpp"
 
 
+// for a filter we can just test, whether it returns true on keys we are certain on having inserted.
+// to validate if it returns false on some amount of negative queries, we need to benchmark it
+
 constexpr uint64_t to_insert{1'000'000};
 
+// the filter is not copyable, yet googletest requires it to be. that's why there are shared_ptrs
 class prefix_filter_test : public testing::TestWithParam<std::variant<std::shared_ptr<prefix::prefix_filter_factory<
   uint64_t,
   prefix::bin_types::non_simd,

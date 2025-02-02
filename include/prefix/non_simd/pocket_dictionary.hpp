@@ -2,14 +2,15 @@
 // Created by nils on 11/24/24.
 //
 
-#ifndef INCLUDE_PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
-#define INCLUDE_PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
+#ifndef PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
+#define PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
 
 #include "util/masks.hpp"
 
 #include <array>
 #include <cstdint>
 #include <cassert>
+#include <string>
 
 namespace prefix::non_simd
 {
@@ -25,11 +26,11 @@ public:
 
   static constexpr bool query(const uint8_t q, const uint8_t r, uint8_t* data)
   {
-    auto index{get_list_index(q, data)};
+    auto index{get_indices(q, data)};
     uint8_t list_size{get_list_size(index[0] + index[1], data)};
     for (uint8_t i{index[1]}; i < index[1] + list_size; ++i)
     {
-      if (data[7 + i] == r)
+      if (data[header_size + i] == r)
       {
         return true;
       }
@@ -46,7 +47,7 @@ public:
       return;
     }
 
-    auto list_index{get_list_index(q, data)};
+    auto list_index{get_indices(q, data)};
     auto list_size{get_list_size(list_index[0] + list_index[1], data)};
 
     // element is inserted because it wasn't already there
@@ -66,7 +67,7 @@ public:
   {
     auto q{find_biggest_q(data)};
     set_biggest_q(q, data);
-    auto list_index{get_list_index(q, data)};
+    auto list_index{get_indices(q, data)};
 
     uint8_t current_max{0};
     uint8_t current_max_index{list_index[1]};
@@ -74,16 +75,15 @@ public:
     // we assume to be in the last list which is required to call this method
     for (uint8_t i{list_index[1]}; i < size(data); ++i)
     {
-      if (data[7 + i] > current_max)
+      if (data[header_size + i] > current_max)
       {
-        current_max = data[7 + i];
+        current_max = data[header_size + i];
         current_max_index = i;
       }
     }
 
-    auto tmp{data[7 + current_max_index]};
-    data[7 + current_max_index] = data[7 + size(data) - 1];
-    data[7 + size(data) - 1] = tmp;
+    data[header_size + current_max_index] = data[header_size + size(data) - 1];
+    data[header_size + size(data) - 1] = current_max;
 
   }
 
@@ -91,7 +91,7 @@ public:
   static constexpr void evict_max(uint8_t* data)
   {
     const uint8_t biggest_q{get_biggest_q(data)};
-    const auto list_indices{get_list_index(biggest_q, data)};
+    const auto list_indices{get_indices(biggest_q, data)};
     auto header{get_header(data)};
     uint64_t up_to_deletion
       {header & util::bit_mask_left_rt<uint64_t>::value(static_cast<uint8_t>(list_indices[0] + list_indices[1] - 1 > 0 ?
@@ -107,7 +107,7 @@ public:
   {
     assert(overflowed(data));
 
-    return data[7 + k - 1];
+    return data[header_size + k - 1];
   }
 
   static constexpr void mark_overflowed(uint8_t* data)
@@ -209,9 +209,9 @@ private:
 
     for (uint8_t i{static_cast<uint8_t>(size(data))}; i > index + list_size; --i)
     {
-      data[7 + i] = data[7 + i - 1];
+      data[header_size + i] = data[header_size + i - 1];
     }
-    data[7 + index + list_size] = r;
+    data[header_size + index + list_size] = r;
 
   }
 
@@ -242,7 +242,8 @@ private:
     return count;
   }
 
-  static constexpr std::array<uint8_t, 2> get_list_index(uint8_t q, uint8_t* data)
+  // returns an array with the counted 0's (list index) at index 0 and counted 1's (body index) at index 1
+  static constexpr std::array<uint8_t, 2> get_indices(uint8_t q, uint8_t* data)
   {
     uint64_t header{get_header(data)};
 
@@ -270,7 +271,9 @@ private:
     __builtin_unreachable();
   }
 
+  static constexpr std::size_t header_size{7};
+
 };
 } // namespace prefix::non_simd
 
-#endif //INCLUDE_PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP
+#endif //PREFIX_NON_SIMD_POCKET_DICTIONARY_HPP

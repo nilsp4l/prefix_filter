@@ -7,7 +7,6 @@
 
 #include <cinttypes>
 #include "util/hash_functions.hpp"
-#include <iostream>
 
 namespace prefix::spare::bloom
 {

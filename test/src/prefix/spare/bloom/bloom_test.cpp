@@ -4,7 +4,10 @@
 
 
 #include <gtest/gtest.h>
-#include <prefix/spare/bloom/bloom_filter_factory.hpp>
+#include "prefix/spare/bloom/bloom_filter_factory.hpp"
+
+// for a filter we can just test, whether it returns true on keys we are certain on having inserted.
+// to validate if it returns false on some amount of negative queries, we need to benchmark it
 
 class bloom_test : public testing::Test
 {
@@ -36,12 +39,12 @@ TEST_F(bloom_test, insert_10_elements)
 TEST_F(bloom_test, insert_random_linear)
 {
 
-  for (uint64_t i{0}; i < 1'000'000; ++i)
+  for (uint64_t i{0}; i < to_insert; ++i)
   {
     filter_.insert(i);
   }
 
-  for (uint64_t i{0}; i < 1'000'000; ++i)
+  for (uint64_t i{0}; i < to_insert; ++i)
   {
     ASSERT_TRUE(filter_.query(i));
   }

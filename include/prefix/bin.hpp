@@ -2,12 +2,11 @@
 // Created by nils on 11/15/24.
 //
 
-#ifndef INCLUDE_PREFIX_BIN_HPP
-#define INCLUDE_PREFIX_BIN_HPP
+#ifndef PREFIX_BIN_HPP
+#define PREFIX_BIN_HPP
 
 #include <bit>
 #include <array>
-#include <iostream>
 #include <functional>
 #include "util/masks.hpp"
 #include "prefix/non_simd/pocket_dictionary.hpp"
@@ -36,10 +35,17 @@ public:
     auto q{util::most_significant_based_fp<maximum_size>::fingerprint(fp)};
     auto r{static_cast<uint8_t>(fp)};
 
+
+    // left that here, because it is valid to have that uncommented to ensure. that way there are no elements stored twice.
+    // anyways, allowing elements stored twice will not change much about the fp-rate (it is very unlikely to happen), yet performance-wise it does.
+    // disallowing it on the other hand could save memory
+    /*
     if (query(fp, data))
     {
       return std::nullopt;
     }
+    */
+
 
     if (pocket_dictionary_t::size(data) == maximum_size && !pocket_dictionary_t::overflowed(data))
     {
@@ -87,7 +93,7 @@ public:
       || (q > pocket_dictionary_t::get_biggest_q(data));
   }
 
-  // for validation
+  // for benchmark
   static constexpr inline std::size_t get_byte_size()
   {
     return 32;
@@ -101,4 +107,4 @@ public:
 };
 } // namespace prefix
 
-#endif // INCLUDE_PREFIX_BIN_HPP
+#endif // PREFIX_BIN_HPP

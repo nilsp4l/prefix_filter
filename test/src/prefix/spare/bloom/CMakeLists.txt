@@ -10,7 +10,7 @@ target_link_libraries(
         bloom_test
         GTest::gtest_main
 )
-target_include_directories(bloom_test PUBLIC ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(bloom_test PUBLIC ../../../../../include)
 
 add_test(bloom_test bloom_test)
 include(GoogleTest)

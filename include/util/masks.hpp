@@ -13,7 +13,7 @@
 namespace util
 {
 
-const __m128i reg_128_all_set{_mm_set1_epi64x(0xffffffffffffffff)};
+const __m128i reg_128_all_set{_mm_set1_epi64x(-1)};
 
 // creates a bitmask with one singular bit set at position counting from left starting at 0
 // for example: bit_mask<uint8_t, 2>::value == 0b0010 0000

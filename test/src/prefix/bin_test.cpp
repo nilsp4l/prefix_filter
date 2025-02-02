@@ -9,7 +9,6 @@
 #include "prefix/non_simd/pocket_dictionary.hpp"
 #include "prefix/simd/pocket_dictionary.hpp"
 #include <variant>
-#include <iostream>
 #include <cstdlib>
 
 class bin_test : public testing::TestWithParam<std::variant<prefix::bin<prefix::non_simd::pocket_dictionary<25>>,
@@ -63,7 +62,6 @@ TEST_P(bin_test, random_insert_lookup_size_10)
     {
       rand_set.insert(rand_val);
       bin::insert(rand_val, data_);
-      ASSERT_EQ(rand_set.size(), bin::size(data_));
     }
 
     for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)
@@ -104,7 +102,6 @@ TEST_P(bin_test, random_insert_lookup_size_25)
     {
       rand_set.insert(rand_val);
       bin::insert(rand_val, data_);
-      ASSERT_EQ(rand_set.size(), bin::size(data_));
     }
 
     for (uint8_t fp{0}; fp < UINT8_MAX; ++fp)

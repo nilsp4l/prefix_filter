@@ -39,5 +39,7 @@ add_test(prefix_filter_test prefix_filter_test)
 include(GoogleTest)
 gtest_discover_tests(pocket_dictionary_test)
 gtest_discover_tests(bin_test)
+gtest_discover_tests(prefix_filter_test)
 
 add_subdirectory(adapted)
+add_subdirectory(spare)

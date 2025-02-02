@@ -77,7 +77,7 @@ public:
 
   }
 
-  // for validation
+  // for benchmark
   static constexpr inline std::size_t get_byte_size()
   {
     return size * bin_t::get_byte_size() + spare_t::get_byte_size();

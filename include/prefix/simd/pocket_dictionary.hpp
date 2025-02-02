@@ -8,7 +8,7 @@
 #include <cstdint>
 #include <immintrin.h>
 #include <optional>
-#include <iostream>
+#include <string>
 
 #include "util/masks.hpp"
 
@@ -36,7 +36,8 @@ public:
     auto cmp_result{_mm256_cmpeq_epi8(pd_reg, _mm256_set1_epi8(static_cast<int8_t>(r)))};
     uint32_t
       matches{static_cast<uint32_t>((
-      (_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data)) << 7)) >> 7))};
+      (_mm256_movemask_epi8(cmp_result) & (util::bit_mask_right_rt<int>::value(size(data)) << header_size))
+        >> header_size))};
 
     // cutdown of queries as described in the paper
     if (matches == 0)
@@ -169,8 +170,8 @@ public:
     }
 
     // set the biggest q in the redundant bits as proposed in the paper
-    data[6] &= util::bit_mask_left<uint8_t, 2>::value;
-    data[6] |= q;
+    data[header_size - 1] &= util::bit_mask_left<uint8_t, 2>::value;
+    data[header_size - 1] |= q;
 
     // at this point it is faster to search for the maximum in the last non-empty list linearely,
     // rather than doing simd
@@ -179,20 +180,20 @@ public:
     uint8_t current_max_index{body_index};
     for (uint8_t i{body_index}; i < size(data); ++i)
     {
-      if (data[7 + i] > current_max)
+      if (data[header_size + i] > current_max)
       {
-        current_max = data[7 + i];
+        current_max = data[header_size + i];
         current_max_index = i;
       }
     }
 
-    data[7 + current_max_index] = data[7 + size(data) - 1];
-    data[7 + size(data) - 1] = current_max;
+    data[header_size + current_max_index] = data[header_size + size(data) - 1];
+    data[header_size + size(data) - 1] = current_max;
   }
 
   static constexpr uint8_t max(uint8_t* data)
   {
-    return data[7 + k - 1];
+    return data[header_size + k - 1];
   }
 
   static constexpr void mark_overflowed(uint8_t* data)
@@ -207,7 +208,7 @@ public:
 
   static constexpr uint8_t get_biggest_q(uint8_t* data)
   {
-    return (data[6] & util::bit_mask_right<uint8_t, 5>::value);
+    return (data[header_size - 1] & util::bit_mask_right<uint8_t, 5>::value);
   }
 
   static inline std::string to_string()
@@ -256,7 +257,7 @@ private:
     // shortcut to not shift anything if not necessary
     if (position == size(data))
     {
-      data[position + 7] = r;
+      data[position + header_size] = r;
       return;
     }
 
@@ -266,9 +267,9 @@ private:
     // shifting ourselves
 
     // we are in the second lane
-    if (position >= 9)
+    if (position >= first_lane_size)
     {
-      position -= 9;
+      position -= first_lane_size;
       __m128i second_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data) + 1)};
 
       auto up_to_insertion{_mm_and_si128(second_lane, util::reg_128_bit_mask_right_rt::value(position))};
@@ -279,7 +280,7 @@ private:
 
       second_lane = _mm_or_si128(second_lane, up_to_insertion);
       _mm_store_si128((reinterpret_cast<__m128i*>(data) + 1), second_lane);
-      data[position + 9 + 7] = r;
+      data[position + first_lane_size + header_size] = r;
       return;
     }
 
@@ -293,30 +294,32 @@ private:
 
     // we need to go here for size() == 9 as well, because the header is not updated on the size we will reach after insertion
     // yet, then it will be > 9 and we'll need to shift out
-    if (size(data) >= 9)
+    if (size(data) >= first_lane_size)
     {
       // last key of the first lane
       shifted_out = data[15];
     }
 
     __m128i first_lane{_mm_load_si128(reinterpret_cast<__m128i*>(data))};
-    auto up_to_insertion{_mm_and_si128(first_lane, util::reg_128_bit_mask_right_rt::value(position + 7))};
+    auto up_to_insertion{_mm_and_si128(first_lane, util::reg_128_bit_mask_right_rt::value(position + header_size))};
 
     first_lane = _mm_slli_si128(first_lane, 1);
 
     // 0 up to the position we want to insert to
-    first_lane = _mm_and_si128(first_lane, util::reg_128_bit_mask_left_rt::value(15 - (position + 7)));
+    first_lane = _mm_and_si128(first_lane, util::reg_128_bit_mask_left_rt::value(15 - (position + header_size)));
 
     first_lane = _mm_or_si128(first_lane, up_to_insertion);
     _mm_store_si128((reinterpret_cast<__m128i*>(data)), first_lane);
-    data[position + 7] = r;
+    data[position + header_size] = r;
 
     if (shifted_out)
     {
-      insert_into_body(9, *shifted_out, data);
+      insert_into_body(first_lane_size, *shifted_out, data);
     }
   }
 
+  static constexpr std::size_t header_size{7};
+  static constexpr uint8_t first_lane_size{9};
 };
 
 } // namespace prefix::simd

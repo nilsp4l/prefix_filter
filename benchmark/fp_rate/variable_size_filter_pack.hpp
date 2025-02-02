@@ -11,6 +11,9 @@
 #include "prefix/spare/bloom/bloom_filter_factory.hpp"
 #include "fp_rate_benchmark.hpp"
 
+
+// this whole class just exists, because google benchmark forces everything down to c++17 and double as a non-typename template parameter is only allowed for c++20 and further
+// i.e. it is not possible to have the factory itself create dynamic sized filters, with a template parameter
 template<std::size_t elements_to_store, prefix::bin_types bin_type>
 class variable_size_filter_pack
 {

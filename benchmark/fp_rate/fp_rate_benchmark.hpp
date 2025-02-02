@@ -63,23 +63,6 @@ public:
       {
         ++no_true_negative;
       }
-
-      /*
-      if (compare_set.find(current_element) == compare_set.end() && filter_.query(current_element))
-      {
-        ++no_false_positive;
-      }
-      else if (compare_set.find(current_element) == compare_set.end() && !filter_.query(current_element))
-      {
-        ++no_true_negative;
-      }
-
-      if (compare_set.find(current_element) != compare_set.end() && !filter_.query(current_element))
-      {
-        std::cout << "FALSE NEGATIVE!" << std::endl;
-      }
-       */
-
     }
 
     return static_cast<double>(no_false_positive) / static_cast<double>(no_false_positive + no_true_negative);
@@ -91,7 +74,6 @@ private:
   filter_t filter_;
 };
 
-template<typename... filter_t_pack>
 struct fp_rate_benchmark
 {
 public:
@@ -130,7 +112,7 @@ public:
     return to_return;
 
   }
-
+  template<typename... filter_t_pack>
   static std::string random_benchmark(std::size_t no_elements)
   {
     std::string to_return;
