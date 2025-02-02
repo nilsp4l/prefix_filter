@@ -51,7 +51,7 @@ struct bit_mask_left_rt
   }
 };
 
-// creates a bitmask with all bits set up to position counting from right starting at 0
+// creates a bitmask with all bits set up to position counting from right starting at 1
 // for example: bit_mask<uint8_t, 2>::value == 0b0000 0011
 template<typename numberT, uint8_t position>
 struct bit_mask_right
@@ -69,6 +69,7 @@ struct bit_mask_right_rt
   }
 };
 
+// mask with offset bytes set, from left
 template<uint8_t offset>
 struct reg_128_bit_mask_left
 {
@@ -87,6 +88,7 @@ struct reg_128_bit_mask_right
   }
 };
 
+// mask with offset bytes set, from right
 struct reg_128_bit_mask_right_rt
 {
   static inline constexpr __m128i value(uint8_t offset)

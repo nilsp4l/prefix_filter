@@ -1,7 +1,7 @@
 # prefix_filter
 Prefix Filter for DSE practical at TUM
 ## required
-linux, gcc, avx and avx-2 support
+x86, linux, gcc, avx and avx-2 support
 ## tests
 Run tests with ```make all test``` in your build directory
 ## benchmark
