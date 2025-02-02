@@ -32,12 +32,14 @@ struct most_significant_based_fp
 template<>
 struct most_significant_based_fp<25>
 {
+  // see Universal hashing and k-wise independent random variables via integer arithmetic without primes by Martin Dietzfelbinger
   constexpr inline static uint8_t fingerprint(uint16_t r)
   {
-    return static_cast<uint8_t>(((static_cast<uint32_t>(r) * 0x1234567 + 0x133742) >> 16) % 25);
+    return static_cast<uint8_t>((((r >> 8) * 0x12345 + 0x1337) >> 8) % 25);
   }
 };
 
+// see Universal hashing and k-wise independent random variables via integer arithmetic without primes by Martin Dietzfelbinger
 struct two_wise
 {
   static inline int128
@@ -108,15 +110,6 @@ struct prefix_fingerprint<uint64_t, size>
     to_return.second = static_cast<uint16_t>(key & UINT16_MAX);
 
     return to_return;
-  }
-};
-
-template<std::size_t no_buckets>
-struct cuckoo_hash
-{
-  constexpr inline static uint64_t hash(uint64_t key)
-  {
-    return key % no_buckets;
   }
 };
 
