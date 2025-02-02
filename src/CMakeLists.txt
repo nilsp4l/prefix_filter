@@ -1,6 +1,6 @@
 set(CMAKE_CXX_STANDARD 20)
 
-set(EXECUTABLE_NAME prefix_filter)
+set(EXECUTABLE_NAME main)
 
 add_subdirectory(prefix)
 
